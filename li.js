@@ -1,16 +1,6 @@
 //
-// lightweight - li.js - Matt Simmons 2018 - version 0.4
+// lightweight - li.js - Matt Simmons 2018 - version 0.0.4
 //
-
-/* How to use: save the following as an .html file and then open it in Google Chrome...
-
-<script src="li.js"></script>
-# hello lightweight
-Wow! Markdown has been converted to *beautiful* html with no effort at all!
-
-Guide on markdown [here](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
-
-*/
 
 
 var css = `
