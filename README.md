@@ -12,6 +12,17 @@ Alternatively, download li.js, save it in the same folder as your document and i
 
 	<script src="li.js"></script>
 
-Then save the file as _.html_ and open in Google Chrome or Safari.
+Then **save the file as .html** and open in Google Chrome or Safari.
 
 Use [Markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) to add formatting to the text.
+
+### More formatting options
+
+On top of standard Markdown formatting, there are some extra li.js options:
+
+Syntax | Result
+--- | ---
+**///** | creates a small gap equal to one tenth of the page height
+**//////** | creates a large gap equal to half the page height (useful for creating gaps between slides in presentations)
+ 
+more coming soon

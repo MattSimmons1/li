@@ -59,7 +59,7 @@ document.getElementsByTagName('head')[0].appendChild(style);
 
 document.addEventListener('DOMContentLoaded', function(){
 
-    var md = document.querySelector("body").textContent;
+    var md = document.querySelector("body").innerHTML;
 
     md = md.replace(/\/\/\/\/\/\//g, '\<div class="big-spacer">\</div>')  
     md = md.replace(/\/\/\//g, '\<div class="spacer">\</div>')
