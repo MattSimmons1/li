@@ -6,7 +6,7 @@ li.js is a lightweight tool for creating formatted documents. It can be used to 
 
 Take any text file and insert the following at the very top:
 
-	<script src='https://rawgithub.com/MattSimmons1/li/master/li.js'></script>
+	<script src='https://li.js.org/li.js'></script>
 
 Alternatively, download li.js, save it in the same folder as your document and import with:
 
@@ -24,5 +24,5 @@ Syntax | Result
 --- | ---
 **///** | creates a small gap equal to one tenth of the page height
 **//////** | creates a large gap equal to half the page height (useful for creating gaps between slides in presentations)
- 
+
 More coming soon!
