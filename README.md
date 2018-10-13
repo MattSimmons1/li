@@ -25,4 +25,4 @@ Syntax | Result
 **///** | creates a small gap equal to one tenth of the page height
 **//////** | creates a large gap equal to half the page height (useful for creating gaps between slides in presentations)
  
-more coming soon
+More coming soon!
