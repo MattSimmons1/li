@@ -151,9 +151,8 @@ function toFraktur(match, text, tag) {
 // PRESENTATION CONTROLS
 //
 
-//var presentationMode = "snap";
-var position = 0;
 
+var position = 0;
 
 
 function scroll(e, direction = 1) { 
@@ -196,8 +195,8 @@ function scroll(e, direction = 1) {
         window.scrollTo(0, position);
     }
 
-    
 }
+
 
 function presentationModeSetup() {
     if (presentationMode) {
