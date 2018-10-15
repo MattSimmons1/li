@@ -1,19 +1,106 @@
 @import url('https://fonts.googleapis.com/css?family=Source+Code+Pro:400,600');
 
-p {
-  font-family: 'Source Code Pro', monospace;
+body {
+  margin: 0;
 }
 
-.main {
-  display: grid;
-  grid-template-rows: 200px 1fr 1fr;
-  height: 100vh; 
+p {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 14px;
+  color: #282a2e;
+}
 
-  margin: 20vw;
+a {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 14px;
+  color: #fff;
+}
+
+h1 {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 50px;
+  color: #fff;
+}
+
+.landing {
+  background: #fff;
+  display: grid;
+  grid-template-rows: 1fr 150px min-content 45px 1fr min-content;
+  grid-template-columns: 15vw 1fr 15vw;
+  grid-row-gap: 15px;
+  
+  height: 100vh;
+  width: 100vw;
 }
 
 .logo {
   background-image: url("../img/logo.png");
-  background-size: cover;
-  background-attachment: fixed;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100%;
+  width: 100%;
+  
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.welcome {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.script-tag {
+  grid-column: 2;
+  grid-row: 4;
+  position: relative;
+}
+ 
+.script-tag-inner {
+  text-align: center;
+  background: #ff8;
+  width: 440px;
+  border-radius: 2px;
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.nav {
+  grid-column: 1 / span 3;
+  grid-row: 6;
+  background: #282a2e;
+  padding: 5px 15vw 5px 15vw;
+  
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; 
+  grid-template-rows: 1fr; 
+}
+.nav a {
+  display: table-cell;
+  vertical-align: bottom;
+  grid-row: 1;
+}
+
+.guide {
+  background: #282a2e;
+  display: grid;
+  grid-template-columns: 15vw 1fr 15vw;
+  grid-template-rows: 1fr auto auto 1fr;
+  grid-row-gap: 15px;
+  
+  height: 100vh; 
+}
+
+.guide-title {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.guide-info {
+  grid-column: 2;
+  grid-row: 3;
+  color: #fff;
 }
