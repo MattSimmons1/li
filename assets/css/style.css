@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Code+Pro:400,600');
+
+p {
+  font-family: 'Source Code Pro', monospace;
+}
+
+.main {
+  display: grid;
+  grid-template-rows: 200px 1fr 1fr;
+  height: 100vh; 
+
+  margin: 20vw;
+}
+
+.logo {
+  background-image: url("../img/logo.png");
+  background-size: cover;
+  background-attachment: fixed;
+}
