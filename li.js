@@ -88,8 +88,11 @@ document.addEventListener('DOMContentLoaded', function(){
     presentationMode = /( *@li\.present)/g.test(md);
     md = md.replace(/@li\.present/g, '');
 
-    // li.table //TODO
-    //md = md.replace(/ *@li\.table *\n(.*\t?)\n((.*\n)*)( *\n)/g, toTable);
+    // li.table
+    md = md.replace(/ *@li\.table *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toTable);
+
+    // li.§ (for emoji)
+    md = md.replace(/@li\.§/g, "");
 
     showdown.setOption('simpleLineBreaks', true);
     showdown.setOption('emoji', true);
@@ -127,10 +130,18 @@ function toTable(match, headerRow, body, none, blankLine) {
     console.log(headerRow)
     console.log(body)
     console.log(none)
-    
+
+    headerRow = headerRow.replace(/,/g, " | ")
+    body = body.replace(/,/g, " | ")
+
+    headerRow = headerRow.replace(/\t/g, " | ")
+    body = body.replace(/\t/g, " | ")
+
+    var headerLine = headerRow.replace(/[^|]/g, "-")
+
     console.log(blankLine)
 
-    return "table wuz ere: " + headerRow
+    return "\n" + headerRow + "\n" + headerLine + "\n" + body + "\n";
 }
 
 function toFraktur(match, text, tag) {
@@ -165,7 +176,7 @@ function scroll(e, direction = 1) {
     // find the nearest spacer above the scroll position
     var nearestUp = spacers.sort(function(a, b){ return (scrollPos >= a[1] ? a[1] : -1) - (scrollPos >= b[1] ? b[1] : -1) })[0];
 
-    var nearestDown = spacers[spacers.indexOf(nearestUp) + 1]
+    var nearestDown = spacers[spacers.indexOf(nearestUp) + 1];
 
     var height = window.innerHeight;
 
