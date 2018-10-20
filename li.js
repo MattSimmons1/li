@@ -14,7 +14,7 @@ var css = `
   h1 {
     font-size: 50px;
   }
-  p, li, ol, ul {
+  p, li, ol, ul, td, th {
     font-size: 12px;
   }
   pre {
@@ -40,12 +40,19 @@ var css = `
     margin: 0 10vw 0 10vw;
     width: 60vw;
     table-layout: fixed;
+    border-collapse: collapse;
   }
   thead {
-    border-bottom: 1px solid #282a2e;
+  }
+  tr {
   }
   td, th {
     text-align: left;
+    padding: 3px;
+    border-left: 0.5px solid #ddd;
+  }
+  th {
+  border-bottom: 0.5px solid #ddd;
   }
   tr:hover {
     background-color: #ddd;
@@ -79,9 +86,17 @@ var presentationMode = false,
 document.addEventListener('DOMContentLoaded', function(){
 
     var md = document.querySelector("body").innerHTML;
-    //TODO: only if alone on a line
+
+    // li.§ (for emoji)
+    md = md.replace(/@li\.§/g, "");
+    // § as spaces
+    md = md.replace(/(?<!\\)§/g, "&nbsp;")
+    md = md.replace(/\\§/g, "§")
+
+    // spacers
     md = md.replace(/\/\/\/\/\/\//g, '\<div class="big-spacer">\</div>');
-    md = md.replace(/\/\/\//g, '\<div class="spacer">\</div>');
+    md = md.replace(/(?<!\\)\/\/\//g, '\<div class="spacer">\</div>');
+    md = md.replace(/\\\/\/\//g, '///');
 
     // ~DETECT FLAGS~
     // li.present
@@ -91,8 +106,6 @@ document.addEventListener('DOMContentLoaded', function(){
     // li.table
     md = md.replace(/ *@li\.table *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toTable);
 
-    // li.§ (for emoji)
-    md = md.replace(/@li\.§/g, "");
 
     showdown.setOption('simpleLineBreaks', true);
     showdown.setOption('emoji', true);
@@ -127,19 +140,18 @@ document.addEventListener('DOMContentLoaded', function(){
 //
 
 function toTable(match, headerRow, body, none, blankLine) {
-    console.log(headerRow)
-    console.log(body)
-    console.log(none)
 
-    headerRow = headerRow.replace(/,/g, " | ")
-    body = body.replace(/,/g, " | ")
+    headerRow = headerRow.replace(/(?<!\\),/g, " | ");
+    headerRow = headerRow.replace(/\\,/g, ",");
+    body = body.replace(/(?<!\\),/g, " | ");
+    body = body.replace(/\\,/g, ",");
 
-    headerRow = headerRow.replace(/\t/g, " | ")
-    body = body.replace(/\t/g, " | ")
+    headerRow = headerRow.replace(/(?<!\\)\t/g, " | ");
+    headerRow = headerRow.replace(/\\\t/g, "\t");
+    body = body.replace(/(?<!\\)\t/g, " | ");
+    body = body.replace(/\\\t/g, "\t");
 
-    var headerLine = headerRow.replace(/[^|]/g, "-")
-
-    console.log(blankLine)
+    var headerLine = headerRow.replace(/[^|]/g, "-");
 
     return "\n" + headerRow + "\n" + headerLine + "\n" + body + "\n";
 }
@@ -165,38 +177,48 @@ function toFraktur(match, text, tag) {
 
 var position = 0;
 
-
-function scroll(e, direction = 1) { 
+function scroll(e, direction = 1) {
     var spacers = [].slice.call(document.querySelectorAll(".big-spacer"))
-    spacers = spacers.map(d => [d, d.offsetTop]);
-    spacers.push(["top", 0]);
+
+    //do nothing if there are no spacers
+    if (spacers.length < 2) {
+        return;
+    }
+
+    spacers = spacers.map(d => d.offsetTop);
+    spacers.push(0);
 
     scrollPos = window.scrollY || window.scrollTop || document.getElementsByTagName("html")[0].scrollTop;
 
-    // find the nearest spacer above the scroll position
-    var nearestUp = spacers.sort(function(a, b){ return (scrollPos >= a[1] ? a[1] : -1) - (scrollPos >= b[1] ? b[1] : -1) })[0];
+    // find the nearest spacer above the scroll position (with a value less than scrollPos)
+    // get all spacers below scroll position
+    var spacersBelow = spacers.filter(function(d){ return scrollPos < d })
 
-    var nearestDown = spacers[spacers.indexOf(nearestUp) + 1];
+    // get the next spacers
+    spacersBelow = spacersBelow.sort(function(a, b){ return a - b });
+    var nearestUp = spacersBelow[0];
+    var nearestDown = spacersBelow[1];
 
     var height = window.innerHeight;
 
     // sort spacers to help with next stage
-    spacers = spacers.sort(function(a, b){ return a[1] - b[1] });
+    spacers = spacers.sort(function(a, b){ return a - b });
 
     // if user has scrolled to the last slide
-    if (nearestDown[0] === "top" && direction !== -1) {
-        var ReverseNearestUp = spacers[Math.max(spacers.indexOf(nearestUp) - 1, 0)]
+    if (typeof(nearestDown) === "undefined" && direction !== -1) {
+        var ReverseNearestUp = spacers[Math.max(spacers.indexOf(nearestUp) - 1, 0)];
 
-        position = (ReverseNearestUp[1] + height/2 + nearestUp[1])/2 - height/2
+        position = (ReverseNearestUp + height/2 + nearestUp)/2 - height/2;
     }
+    // if going backwards
     else if (direction === -1) {
-        var ReverseNearestUp = spacers[Math.max(spacers.indexOf(nearestUp) - 1, 0)]
-        var ReverseNearestDown = spacers[Math.max(spacers.indexOf(ReverseNearestUp) - 1, 0)]
+        var ReverseNearestUp = spacers[Math.max(spacers.indexOf(nearestUp) - 1, 0)];
+        var ReverseNearestDown = spacers[Math.max(spacers.indexOf(ReverseNearestUp) - 1, 0)];
 
-        position = (ReverseNearestDown[1] + height/2 + ReverseNearestUp[1])/2 - height/2
+        position = (ReverseNearestDown + height/2 + ReverseNearestUp)/2 - height/2;
     }
     else {
-        position = (nearestUp[1] + height/2 + nearestDown[1])/2 - height/2
+        position = (nearestUp + height/2 + nearestDown)/2 - height/2;
     }
 
     if (transitionMode === "smooth") {
