@@ -98,14 +98,16 @@ document.addEventListener('DOMContentLoaded', function(){
     md = md.replace(/(?<!\\)\/\/\//g, '\<div class="spacer">\</div>');
     md = md.replace(/\\\/\/\//g, '///');
 
-    // ~DETECT FLAGS~
     // li.present
     presentationMode = /( *@li\.present)/g.test(md);
     md = md.replace(/@li\.present/g, '');
 
+    //colour tags - rgb version (may have been converted to HTML tags by the browser)
+    md = md.replace(/(?<!\\)< *rgb(.*?):(.*?)>/g, "<span style='color:rgb$1;'>$2</span>");
+    md = md.replace(/(?<!\\)&lt; *rgb(.*?):(.*?)&gt;/g, "<span style='color:rgb$1;'>$2</span>");
+
     // li.table
     md = md.replace(/ *@li\.table *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toTable);
-
 
     showdown.setOption('simpleLineBreaks', true);
     showdown.setOption('emoji', true);
@@ -115,9 +117,14 @@ document.addEventListener('DOMContentLoaded', function(){
     var converter = new showdown.Converter(),
         html = converter.makeHtml(md);
 
+    // ~PARSE HTML~
 
-    // @li.fraktur
+    // li.fraktur
     html = html.replace(/<.+> *@li\.fraktur (.*)<\/(.+)>/g, toFraktur);
+
+    // colour tags - hex version
+    html = html.replace(/(?<!\\)&lt; *#(.*?):(.*?)&gt;/g, "<span style='color:#$1;'>$2</span>");
+    html = html.replace(/(?<!\\)< *#(.*?):(.*?)>/g, "<span style='color:#$1;'>$2</span>");
 
     //fix html entities //TODO: make sure it's only in code tags
     html = html
@@ -125,6 +132,10 @@ document.addEventListener('DOMContentLoaded', function(){
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .replace(/&amp;/g, '&');
+
+    // unescape chars the user escaped
+    html = html.replace(/\\</g, "<");
+
 
     document.querySelector("body").innerHTML = html;
 
