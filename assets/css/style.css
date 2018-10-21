@@ -26,6 +26,21 @@ h1 {
   color: #fff;
 }
 
+h3 {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 18px;
+  color: #fff;
+  margin-top: 50px;
+}
+
+tr, td {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 14px;
+  color: #fff;
+  padding: 6px;
+  text-align: left;
+}
+
 .landing {
   background: #fff;
   display: grid;
@@ -97,10 +112,10 @@ h1 {
   background: #282a2e;
   display: grid;
   grid-template-columns: 15vw 1fr 15vw;
-  grid-template-rows: 1fr auto auto 1fr;
+  grid-template-rows: 10vh auto auto auto auto auto auto 10vh;
   grid-row-gap: 15px;
   
-  height: 100vh; 
+  height: auto; 
 }
 
 .guide-title {
@@ -108,8 +123,33 @@ h1 {
   grid-row: 2;
 }
 
+.guide-subtitle {
+  grid-column: 2;
+  grid-row: 4;
+}
+
 .guide-info {
   grid-column: 2;
   grid-row: 3;
   color: #fff;
+}
+
+.guide-table {
+  grid-column: 2;
+  table-layout: fixed;
+  width: 70vw; 
+  padding: 50px;
+}
+
+.guide-table-1 {
+  grid-row: 5;
+}
+
+.guide-subtitle-2 {
+  grid-column: 2;
+  grid-row: 6;
+}
+
+.guide-table-2 {
+  grid-row: 7;
 }

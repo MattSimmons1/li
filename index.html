@@ -31,7 +31,58 @@
   </div>
   <div class="guide" id="guide">
     <h1 class="guide-title">Syntax Guide</h1>
-    <p class="guide-info">Full guide coming soon. Use <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet">Markdown</a> syntax to add formatting.</p>
+    <p class="guide-info">Use <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet">Markdown</a> syntax to add formatting. li.js also adds some new syntax.</p>
+    <h3 class="guide-subtitle">li.js Shortcuts</h3>
+    <table class="guide-table guide-table-1">
+      <thead>
+        <tr>
+          <th>Syntax</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>///</td>
+          <td>Creates a blank space equal to 1/10th of the page height</td>
+        </tr>
+        <tr>
+          <td>//////</td>
+          <td>Creates a blank space equal to 1/2 of the page height. Also separates out slides when used with li.present</td>
+        </tr>
+        <tr>
+          <td>&lt;#ffff88: <em>text</em>&gt;</td>
+          <td>Colours the text in the tag with the colour from the hex code</td>
+        </tr>
+        <tr>
+          <td>&lt;rgb(255, 180, 30): <em>text</em>&gt;</td>
+          <td>Colours the text in the tag with the colour from the rgb code</td>
+        </tr>
+        <tr>
+          <td>§</td>
+          <td>Creates a non-breaking space. Useful for spacing out. (use \§ to type a §)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="guide-subtitle guide-subtitle-2">li.js Functions</h3>
+    <table class="guide-table guide-table-2">
+      <thead>
+        <tr>
+          <th>Syntax</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>li.present</td>
+          <td>Enables presentation mode. Use the mouse click or arrow keys to navigate through slides</td>
+        </tr>
+        <tr>
+          <td>li.table</td>
+          <td>Converts a CSV or TSV starting on the line below to a table. Does not work if there are rogue commas or tabs unless they are escaped with </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
 </body>
