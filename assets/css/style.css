@@ -153,3 +153,27 @@ tr, td {
 .guide-table-2 {
   grid-row: 7;
 }
+
+.li-tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted #fff;
+}
+  .li-tooltip .li-tooltip-text {
+    visibility: hidden;
+    width: max-content;
+    color: #282a2e;
+    background-color: #fff;
+    text-align: center;
+    padding: 5px;
+    border-radius: 3px;
+
+    position: absolute;
+    z-index: 1;
+    top: 125%;
+    left: 50%;
+    transform: translate(-50%, 0);
+  }
+  .li-tooltip:hover .li-tooltip-text {
+    visibility: visible;
+  }

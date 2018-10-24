@@ -63,6 +63,29 @@ var css = `
   .spacer {
     height: 10vh;
   }
+  .li-tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted #282a2e;
+  }
+  .li-tooltip .li-tooltip-text {
+    visibility: hidden;
+    width: max-content;
+    background-color: #282a2e;
+    color: #fff;
+    text-align: center;
+    padding: 5px;
+    border-radius: 3px;
+
+    position: absolute;
+    z-index: 1;
+    top: 125%;
+    left: 50%;
+    transform: translate(-50%, 0);
+  }
+  .li-tooltip:hover .li-tooltip-text {
+    visibility: visible;
+  }
 `
 
 var style = document.createElement('style');
@@ -106,9 +129,14 @@ document.addEventListener('DOMContentLoaded', function(){
     md = md.replace(/(?<!\\)< *rgb(.*?):(.*?)>/g, "<span style='color:rgb$1;'>$2</span>");
     md = md.replace(/(?<!\\)&lt; *rgb(.*?):(.*?)&gt;/g, "<span style='color:rgb$1;'>$2</span>");
 
+        //tooltips - TODO: something changes \) to ) which prevents \) detection
+    md = md.replace(/(?<!\\)@li\.tooltip\((.*?)(?<!\\):(.*?)(?<!\\)\)/g, "<span class='li-tooltip'>$1<span class='li-tooltip-text'>$2</span></span>");
+
+
     // li.table
     md = md.replace(/ *@li\.table *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toTable);
 
+    showdown.setFlavor('github');
     showdown.setOption('simpleLineBreaks', true);
     showdown.setOption('emoji', true);
     showdown.setOption('tables', true);
@@ -119,13 +147,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
     // ~PARSE HTML~
 
-    // li.fraktur
-    html = html.replace(/<.+> *@li\.fraktur (.*)<\/(.+)>/g, toFraktur);
-
-    // colour tags - hex version
-    html = html.replace(/(?<!\\)&lt; *#(.*?):(.*?)&gt;/g, "<span style='color:#$1;'>$2</span>");
-    html = html.replace(/(?<!\\)< *#(.*?):(.*?)>/g, "<span style='color:#$1;'>$2</span>");
-
     //fix html entities //TODO: make sure it's only in code tags
     html = html
       .replace(/&quot;/g, '"')
@@ -133,9 +154,19 @@ document.addEventListener('DOMContentLoaded', function(){
       .replace(/&gt;/g, '>')
       .replace(/&amp;/g, '&');
 
-    // unescape chars the user escaped
-    html = html.replace(/\\</g, "<");
+    // li.fraktur
+    html = html.replace(/<.+> *@li\.fraktur (.*)<\/(.+)>/g, toFraktur);
 
+    // colour tags - hex version
+    html = html.replace(/(?<!\\)< *#(.*?):(.*?)>/g, "<span style='color:#$1;'>$2</span>");
+
+
+    // unescape chars the user escaped
+    html = html.replace(/\\([@)])/g, "$1");
+
+    //remove backslash in \< and \> only if they are not part of actual tags
+    html = html.replace(/\\(< *#)/g, "$1");    //hex colour tag
+    html = html.replace(/\\(< *rgb)/g, "$1");  //rgb colour tag
 
     document.querySelector("body").innerHTML = html;
 
