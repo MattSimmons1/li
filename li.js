@@ -89,6 +89,7 @@ var css = `
   .li-tooltip:hover .li-tooltip-text {
     visibility: visible;
   }
+
   .li-watermark {
     position: absolute;
     top: 0;
@@ -156,12 +157,15 @@ document.addEventListener('DOMContentLoaded', function(){
     md = md.replace(/(?<!\\)< *rgb(.*?):(.*?)>/g, "<span style='color:rgb$1;'>$2</span>");
     md = md.replace(/(?<!\\)&lt; *rgb(.*?):(.*?)&gt;/g, "<span style='color:rgb$1;'>$2</span>");
 
-    //tooltips - TODO: something changes \) to ) which prevents \) detection
+    // li.tooltip - TODO: something changes \) to ) which prevents \) detection
     md = md.replace(/(?<!\\)@li\.tooltip\((.*?)(?<!\\):(.*?)(?<!\\)\)/g, "<span class='li-tooltip'>$1<span class='li-tooltip-text'>$2</span></span>");
-
 
     // li.table
     md = md.replace(/ *@li\.table *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toTable);
+
+    // li.big
+    md = md.replace(/ *@li\.big(.*)?\n/g, toBigText);
+
 
     showdown.setFlavor('github');
     showdown.setOption('simpleLineBreaks', true);
@@ -216,7 +220,6 @@ document.addEventListener('DOMContentLoaded', function(){
     html = html.replace(/(?<!\\)<==(?!>)/g, "<span style='font-size: 13.8px; line-height: 0.4'>⟸</span>");
     html = html.replace(/\\<==/g, "<==");
 
-
     //add watermark
     html += watermark;
 
@@ -248,6 +251,19 @@ function toTable(match, headerRow, body, none, blankLine) {
     var headerLine = headerRow.replace(/[^|]/g, "-");
 
     return "\n" + headerRow + "\n" + headerLine + "\n" + body + "\n";
+}
+
+function toBigText(match, text) {
+
+    if (typeof(text) === "undefined") {
+        return "";
+    }
+
+    var scale = 1/text.length;
+
+    //TODO: get length of text within tags
+
+    return `<div style='width: 100%; text-align: center;'><p style='margin: 0; font-size: calc(130vw * ${scale});'>${text}</p></div>`
 }
 
 function toFraktur(match, text, tag) {
