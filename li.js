@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function(){
     md = md.replace(/(?<!\\)< *rgb(.*?):(.*?)>/g, "<span style='color:rgb$1;'>$2</span>");
     md = md.replace(/(?<!\\)&lt; *rgb(.*?):(.*?)&gt;/g, "<span style='color:rgb$1;'>$2</span>");
 
-        //tooltips - TODO: something changes \) to ) which prevents \) detection
+    //tooltips - TODO: something changes \) to ) which prevents \) detection
     md = md.replace(/(?<!\\)@li\.tooltip\((.*?)(?<!\\):(.*?)(?<!\\)\)/g, "<span class='li-tooltip'>$1<span class='li-tooltip-text'>$2</span></span>");
 
 
@@ -194,6 +194,28 @@ document.addEventListener('DOMContentLoaded', function(){
     //remove backslash in \< and \> only if they are not part of actual tags
     html = html.replace(/\\(< *#)/g, "$1");    //hex colour tag
     html = html.replace(/\\(< *rgb)/g, "$1");  //rgb colour tag
+
+    // <--> or <-> TODO: add to documentation
+    html = html.replace(/(?<!\\)<--?>/g, "<span style='font-size: 13.8px; line-height: 0.4'>⟷</span>");
+    html = html.replace(/\\<-->/g, "<-->");
+    html = html.replace(/\\<->/g, "<->");
+    // -->
+    html = html.replace(/(?<![\\<])-->/g, "<span style='font-size: 13.8px; line-height: 0.4'>⟶</span>");
+    html = html.replace(/\\-->/g, "-->"); // TODO: this one doesn't work because the backslash gets removed somehow
+    // <--
+    html = html.replace(/(?<!\\)<--(?!>)/g, "<span style='font-size: 13.8px; line-height: 0.4'>⟵</span>");
+    html = html.replace(/\\<--/g, "<--");
+    // <==> or <=>
+    html = html.replace(/(?<!\\)<==?>/g, "<span style='font-size: 13.8px; line-height: 0.4'>⟺</span>");
+    html = html.replace(/\\<==>/g, "<==>");
+    html = html.replace(/\\<=>/g, "<=>");
+    // ==>
+    html = html.replace(/(?<![\\<])==>/g, "<span style='font-size: 13.8px; line-height: 0.4'>⟹</span>");
+    html = html.replace(/\\==>/g, "==>");
+    // <==
+    html = html.replace(/(?<!\\)<==(?!>)/g, "<span style='font-size: 13.8px; line-height: 0.4'>⟸</span>");
+    html = html.replace(/\\<==/g, "<==");
+
 
     //add watermark
     html += watermark;
