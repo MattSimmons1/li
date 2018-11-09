@@ -38,6 +38,7 @@ var css = `
     display: block;
     margin-left: auto;
     margin-right: auto;
+    max-width: 80vw;
   }
   table {
     margin: 0 10vw 0 10vw;
