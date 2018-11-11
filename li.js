@@ -164,9 +164,14 @@ document.addEventListener('DOMContentLoaded', function(){
     // li.table
     md = md.replace(/ *@li\.table *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toTable);
 
+    // li.tree
+    md = md.replace(/ *(?<!\\)@li\.(?:d3\.)?tree *\n((.*\n)*?)( *\n)/g, tree_o_matic);
+
     // li.big
     md = md.replace(/ *@li\.big(.*)?\n/g, toBigText);
 
+    // li.center
+    md = md.replace(/ *@li.cent(er|re)(.*)?\n/g, "<p style='text-align:center;'>$2</p>");
 
     showdown.setFlavor('github');
     showdown.setOption('simpleLineBreaks', true);
@@ -191,7 +196,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
     // colour tags - hex version
     html = html.replace(/(?<!\\)< *#(.*?):(.*?)>/g, "<span style='color:#$1;'>$2</span>");
-
 
     // unescape chars the user escaped
     html = html.replace(/\\([@)])/g, "$1");
@@ -229,6 +233,10 @@ document.addEventListener('DOMContentLoaded', function(){
     // ~HTML ANALYSIS~
 
     presentationModeSetup();
+
+    if (typeof(d3) !== "undefined") {
+        renderD3();
+    }
 
 }, false);
 
@@ -278,6 +286,132 @@ function toFraktur(match, text, tag) {
         
         return index == -1 ? d : "&#x" + fraktur[index].toString(16);
     }).join("") + "</" + tag + ">");
+}
+
+//
+// D3
+//
+
+//render all D3 TODO: on window resize refresh render functions
+function renderD3() {
+    if(!d3.li) {
+        return;
+    }
+
+    // li.tree
+    if(d3.li.treeData) {
+        d3.li.treeData.forEach(function(d, i){ drawTree(d, i) });
+    }
+
+}
+
+//from https://beta.observablehq.com/@mbostock/tree-o-matic
+function tree_o_matic(match, body, none, blankLine) {
+
+    if (typeof(d3) === "undefined") {
+        return "Could not create tree: D3 module not found. Import D3 at the top of the file with a tag like this: \n\n    &lt;script src='https://d3js.org/d3.v5.min.js'&gt;&lt;/script&gt;";
+    }
+
+    //create data object
+    const parents = [];
+    const nodes = body.trim().split(/\n/g);
+    parents.push({children: []});
+    for (let i = 0, n = nodes.length; i < n; ++i) {
+        let parent, depth = nodes[i].match(/^\s*/)[0].length;
+        while (!(parent = parents[depth])) --depth;
+        if (!parent.children) parent.children = [];
+        parent.children.push(parents[depth + 1] = {name: nodes[i].slice(depth)});
+    }
+    var data = parents[0].children.length === 1 ? parents[0].children[0] : parents[0];
+
+    //store data globally to be used after parsing has finished
+    if(!d3.li) {
+        d3.li = {}
+    }
+    if(!d3.li.treeData){
+        d3.li.treeData = [data]
+    }
+    else {
+        d3.li.treeData.push(data)
+    }
+
+    let index = d3.li.treeData.length - 1;
+
+    return `<svg style='' id='tree-${index}'><svg>`
+}
+
+function tree(data) {
+    const root = d3.hierarchy(data);
+    root.dx = 10;
+    root.dy = window.innerWidth*0.8 / (root.height + 1);
+    let layout;
+
+    var algorithm = "cluster"; //TODO: make dynamic
+
+    switch (algorithm) {
+        case "cluster": layout = d3.cluster(); break;
+        case "cluster-no-separation": layout = d3.cluster().separation(() => 1); break;
+        case "tree": layout = d3.tree(); break;
+    }
+    return layout.nodeSize([root.dx, root.dy])(root);
+}
+
+function drawTree(data, i) {
+
+    const root = tree(data);
+
+    const svg = d3.select("body").select("svg#tree-" + i)
+      .style("background", "white")
+      .style("font-size", "10px sans-serif");
+
+    const g = svg.append("g");
+
+    const link = g.append("g")
+      .attr("fill", "none")
+      .attr("stroke", "#555")
+      .attr("stroke-opacity", 0.4)
+      .attr("stroke-width", 1.5)
+    .selectAll("path")
+      .data(root.links())
+      .enter().append("path")
+        .attr("d", d => `
+          M${d.target.y},${d.target.x}
+          C${d.source.y + root.dy / 2},${d.target.x}
+           ${d.source.y + root.dy / 2},${d.source.x}
+           ${d.source.y},${d.source.x}
+        `);
+
+    const node = g.append("g")
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-width", 3)
+      .selectAll("g")
+      .data(root.descendants().reverse())
+      .enter().append("g")
+        .attr("transform", d => `translate(${d.y},${d.x})`);
+
+    node.append("circle")
+      .attr("fill", d => d.children ? "#555" : "#999")
+      .attr("r", 2.5);
+
+    node.append("text")
+      .attr("dy", "0.31em")
+      .attr("x", d => d.children ? -6 : 6)
+      .text(d => d.data.name)
+      .filter(d => d.children)
+        .attr("text-anchor", "end")
+      .clone(true).lower()
+        .attr("stroke", "white");
+
+    var {x, y, width, height} = g.node().getBBox();
+
+    width = window.innerWidth*0.8;
+
+    svg
+      .style("max-width", "100%")
+      .style("height", "auto")
+      .attr("width", width + 10)
+      .attr("height", height + 10)
+      .attr("viewBox", `${x - 5} ${y - 5} ${width + 10} ${height + 10}`);
 }
 
 
