@@ -164,8 +164,11 @@ document.addEventListener('DOMContentLoaded', function(){
     // li.table
     md = md.replace(/ *@li\.table *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toTable);
 
-    // li.tree
-    md = md.replace(/ *(?<!\\)@li\.(?:d3\.)?tree *\n((.*\n)*?)( *\n)/g, tree_o_matic);
+    // li.d3.force-bubble // TODO: add to documentation
+    md = md.replace(/ *(?<!\\)@li\.(?:d3\.)?force-bubble *\n((.*\n)*?)( *\n)/g, toForceBubble);
+
+    // li.d3.tree & li.d3.cluster // TODO: add to documentation
+    md = md.replace(/ *(?<!\\)@li\.(?:d3\.)?(tree|cluster|cluster-no-separation) *\n((.*\n)*?)( *\n)/g, tree_o_matic);
 
     // li.big
     md = md.replace(/ *@li\.big(.*)?\n/g, toBigText);
@@ -298,19 +301,41 @@ function renderD3() {
         return;
     }
 
-    // li.tree
+    // li.d3.tree & li.d3.cluster
     if(d3.li.treeData) {
         d3.li.treeData.forEach(function(d, i){ drawTree(d, i) });
     }
 
+     // li.d3.force-bubbles
+    if(d3.li.forceBubblesData) {
+        d3.li.forceBubblesData.forEach(function(d, i){ drawForceBubbles(d, i) });
+    }
+
+}
+
+const d3Error = "<span style='color: red'>ERROR\nCould not create tree: D3 module not found. Import D3 at the top of the file with a tag like this: \n\n    &lt;script src='https://d3js.org/d3.v5.min.js'&gt;&lt;/script&gt;</span>\n";
+
+
+//gets matched csv or tsv style text and turns it into an array of arrays
+function parseD3CSV(match, body, none, blankLine) {
+
+    body = body.trim();
+
+    body = body.replace(/(?<!\\),/g, "__DELIM__");
+    body = body.replace(/\\,/g, ",");
+
+    body = body.replace(/(?<!\\)\t/g, "__DELIM__");
+    body = body.replace(/\\\t/g, "\t");
+
+    var data = body.split("\n").map(d => d.split("__DELIM__").map(d => parseFloat(d) ? parseFloat(d) : d));
+
+    return data;
 }
 
 //from https://beta.observablehq.com/@mbostock/tree-o-matic
-function tree_o_matic(match, body, none, blankLine) {
+function tree_o_matic(match, algorithm, body, none, blankLine) {
 
-    if (typeof(d3) === "undefined") {
-        return "Could not create tree: D3 module not found. Import D3 at the top of the file with a tag like this: \n\n    &lt;script src='https://d3js.org/d3.v5.min.js'&gt;&lt;/script&gt;";
-    }
+    if (typeof(d3) === "undefined") return d3Error;
 
     //create data object
     const parents = [];
@@ -328,37 +353,33 @@ function tree_o_matic(match, body, none, blankLine) {
     if(!d3.li) {
         d3.li = {}
     }
-    if(!d3.li.treeData){
-        d3.li.treeData = [data]
+    if(!d3.li.treeData) {
+        d3.li.treeData = [{data, algorithm}];
     }
     else {
-        d3.li.treeData.push(data)
+        d3.li.treeData.push({data, algorithm});
     }
 
     let index = d3.li.treeData.length - 1;
 
-    return `<svg style='' id='tree-${index}'><svg>`
+    return `<svg id='tree-${index}'></svg>`;
 }
-
-function tree(data) {
+function tree(data, algorithm) {
     const root = d3.hierarchy(data);
     root.dx = 10;
     root.dy = window.innerWidth*0.8 / (root.height + 1);
     let layout;
-
-    var algorithm = "cluster"; //TODO: make dynamic
 
     switch (algorithm) {
         case "cluster": layout = d3.cluster(); break;
         case "cluster-no-separation": layout = d3.cluster().separation(() => 1); break;
         case "tree": layout = d3.tree(); break;
     }
-    return layout.nodeSize([root.dx, root.dy])(root);
+    return layout.nodeSize([root.dx * 1.4, root.dy])(root);
 }
+function drawTree(treeData, i) {
 
-function drawTree(data, i) {
-
-    const root = tree(data);
+    const root = tree(treeData.data, treeData.algorithm);
 
     const svg = d3.select("body").select("svg#tree-" + i)
       .style("background", "white")
@@ -414,6 +435,102 @@ function drawTree(data, i) {
       .attr("viewBox", `${x - 5} ${y - 5} ${width + 10} ${height + 10}`);
 }
 
+
+function toForceBubble(match, body, none, blankLine) {
+
+    if (typeof(d3) === "undefined") return d3Error;
+
+    var data = parseD3CSV(match, body, none, blankLine);
+
+    //store data globally to be used after parsing has finished
+    if(!d3.li) {
+        d3.li = {}
+    }
+    if(!d3.li.forceBubblesData) {
+        d3.li.forceBubblesData = [{data}];
+    }
+    else {
+        d3.li.forceBubblesData.push({data});
+    }
+
+    let index = d3.li.forceBubblesData.length - 1;
+
+    return `<svg id='force-bubbles-${index}'></svg>`;
+}
+
+function drawForceBubbles(bubblesData, i) {
+
+    const w = window.innerWidth*.8;
+    const h = window.innerHeight*.8;
+
+    //set the scale so that the approximate diameter = the height of the page
+    //total proportional to root of the radius
+    const scale = d3.scaleLinear()
+      .domain([0, Math.sqrt(d3.sum(bubblesData.data, d => d[1]))])
+      .range([0, 0.3*window.innerHeight]);
+
+    //TODO: show scale if d[2]
+    const colourScale = d3.scaleLinear()
+      .domain([0, d3.max(bubblesData.data, d => d[2])])
+      .interpolate(d3.interpolateHcl)
+      .range(["#f00", "#00f"]);
+
+    const svg = d3.select("body").select("svg#force-bubbles-" + i)
+      .style("height", h)
+      .style("width", w);
+
+    var simulation = d3.forceSimulation()
+      .force("center", d3.forceCenter(w/2, h/2))
+      .force("collide", d3.forceCollide().radius(function(d){ return scale(Math.sqrt(d[1])) }))//.strength(0.35)
+      .force("forceX", d3.forceX().strength(0.5).x(w/2))
+      .force("forceY", d3.forceY().strength(0.5).y(h/2));
+
+    var node = svg.append("g")
+      .attr("class", "nodes")
+      .selectAll("circle")
+      .data(bubblesData.data)
+      .enter().append("circle")
+        .attr("r", function(d){ return scale(Math.sqrt(d[1])); })
+        .style("fill", function(d){ return d[2] ? colourScale(d[2]) : "#555"; })
+        .style("stroke", "#fff")
+        .style("stroke-width", 1)
+        .call(d3.drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended));
+
+    node
+      .append("title")
+      .text(function(d) { return d.id; });
+
+    simulation
+      .nodes(bubblesData.data)
+      .on("tick", ticked);
+
+    function ticked() {
+      node
+        .attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; });
+    }
+
+    function dragstarted(d) {
+      if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+    }
+
+    function dragged(d) {
+      d.fx = d3.event.x;
+      d.fy = d3.event.y;
+    }
+
+    function dragended(d) {
+      if (!d3.event.active) simulation.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+    }
+
+}
 
 //
 // PRESENTATION CONTROLS
