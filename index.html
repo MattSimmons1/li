@@ -74,21 +74,48 @@
       </thead>
       <tbody>
         <tr>
-          <td>@li.present</td>
-          <td>Enables presentation mode. Use the mouse click or arrow keys to navigate through slides</td>
-        </tr>
-        <tr>
           <td>@li.table</td>
           <td>Converts a CSV or TSV starting on the line below to a table. Does not work if there are rogue commas or tabs unless they are escaped with \</td>
         </tr>
-
+        <tr>
+          <td>@li.present</td>
+          <td>Enables presentation mode. Use the mouse click or arrow keys to navigate through slides</td>
+        </tr>
         <tr>
           <td>@li.tooltip( <em>text</em> : <em>hover text</em> )</td>
           <td>Displays the hover text when the mouse hovers over the <span class="li-tooltip">text<span class="li-tooltip-text">like this!</span></span></td>
         </tr>
         <tr>
+          <td>@li.font( <em>font name</em> <em>[, import url]</em>)</td>
+          <td>Changes the font for the whole document. If only one parameter is passed li.js will try to find a font on <a href="https://fonts.google.com">Google Fonts</a> with that name</td>
+        </tr>
+        <tr>
           <td>@li.big</td>
           <td>Makes text on the same line as large as possible</td>
+        </tr>
+      </tbody>
+    </table>
+
+  <h3 class="guide-subtitle guide-subtitle-3">li.js + D3.js Functions</h3>
+  <table class="guide-table guide-table-3">
+      <thead>
+        <tr>
+          <th>Syntax</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>@li.d3.tree<br><em>root<br>&nbsp;branch<br>&nbsp;&nbsp;leaf<br>&nbsp;branch<br>&nbsp;&nbsp;leaf</em></td>
+          <td>Converts data on the lines below to a tree diagram. The expected data format is shown on the left, where the spaces before each node indicate it's depth in the hierarchy (one space per level). The implementation is identical to Mike Bostock's <a href="https://beta.observablehq.com/@mbostock/tree-o-matic">Tree-o-Matic</a></td>
+        </tr>
+        <tr>
+          <td>@li.d3.cluster<br><em>root<br>&nbsp;branch<br>&nbsp;&nbsp;leaf<br>&nbsp;branch<br>&nbsp;&nbsp;leaf</em></td>
+          <td>Creates a tree using the d3.cluster algorithm. @li.d3.cluster-no-separation can also be used</td>
+        </tr>
+        <tr>
+          <td>@li.d3.force-bubble<br><em>A, 143<br>B, 302<br>C, 240<br>D, 134</em></td>
+          <td>Converts data on the lines below to a force layout bubble chart. Example of data format is shown on the left, where the first value for each line is the label, and the second is the area of the bubble. If there is a third value it will be used to colour the bubbles</td>
         </tr>
       </tbody>
     </table>

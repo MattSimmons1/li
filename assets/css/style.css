@@ -37,7 +37,7 @@ tr, td {
   font-family: 'Source Code Pro', monospace;
   font-size: 14px;
   color: #fff;
-  padding: 6px;
+  padding: 10px 0 10px 0;
   text-align: left;
 }
 
@@ -112,7 +112,7 @@ tr, td {
   background: #282a2e;
   display: grid;
   grid-template-columns: 15vw 1fr 15vw;
-  grid-template-rows: 10vh auto auto auto auto auto auto 10vh;
+  grid-template-rows: 10vh auto auto auto auto auto auto auto auto 10vh;
   grid-row-gap: 15px;
   
   height: auto; 
@@ -154,26 +154,35 @@ tr, td {
   grid-row: 7;
 }
 
+.guide-subtitle-3 {
+  grid-column: 2;
+  grid-row: 8;
+}
+
+.guide-table-3 {
+  grid-row: 9;
+}
+
 .li-tooltip {
   position: relative;
   display: inline-block;
   border-bottom: 1px dotted #fff;
 }
-  .li-tooltip .li-tooltip-text {
-    visibility: hidden;
-    width: max-content;
-    color: #282a2e;
-    background-color: #fff;
-    text-align: center;
-    padding: 5px;
-    border-radius: 3px;
+.li-tooltip .li-tooltip-text {
+  visibility: hidden;
+  width: max-content;
+  color: #282a2e;
+  background-color: #fff;
+  text-align: center;
+  padding: 5px;
+  border-radius: 3px;
 
-    position: absolute;
-    z-index: 1;
-    top: 125%;
-    left: 50%;
-    transform: translate(-50%, 0);
-  }
-  .li-tooltip:hover .li-tooltip-text {
-    visibility: visible;
-  }
+  position: absolute;
+  z-index: 1;
+  top: 125%;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+.li-tooltip:hover .li-tooltip-text {
+  visibility: visible;
+}
