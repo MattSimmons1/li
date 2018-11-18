@@ -82,16 +82,24 @@
           <td>Enables presentation mode. Use the mouse click or arrow keys to navigate through slides</td>
         </tr>
         <tr>
-          <td>@li.tooltip( <em>text</em> : <em>hover text</em> )</td>
+          <td>@li.tooltip( <em>text</em> : <em>hover_text</em> )</td>
           <td>Displays the hover text when the mouse hovers over the <span class="li-tooltip">text<span class="li-tooltip-text">like this!</span></span></td>
         </tr>
         <tr>
-          <td>@li.font( <em>font name</em> <em>[, import url]</em>)</td>
+          <td>@li.font( <em>font name</em> <em>[, import_url ]</em>)</td>
           <td>Changes the font for the whole document. If only one parameter is passed li.js will try to find a font on <a href="https://fonts.google.com">Google Fonts</a> with that name</td>
+        </tr>
+        <tr>
+          <td>@li.centre</td>
+          <td>Positions text on the same line in the centre of the page</td>
         </tr>
         <tr>
           <td>@li.big</td>
           <td>Makes text on the same line as large as possible</td>
+        </tr>
+        <tr>
+          <td>@li.youtube( <em>video_id [, size ]</em>)</td>
+          <td>Embeds the YouTube video with the <a href="https://gist.github.com/jakebellacera/d81bbf12b99448188f183141e6696817">video id</a> specified. The second parameter controls the width of the video in pixels. It can also be set to <em>'full'</em> to make the video fill the screen</td>
         </tr>
       </tbody>
     </table>

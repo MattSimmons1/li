@@ -1,0 +1,381 @@
+<script src='https://li.js.org/li.js'></script>
+# li.js Cheat Sheet
+
+All li.js functionality is shown on this page. This document will still work if you download it and open it in a modern web browser.
+
+
+
+///
+
+
+
+## Markdown
+
+Markdown is a lightweight markup language with plain text formatting syntax. It's easy to read and easy to write.
+
+Text in markdown is automatically put into paragraphs, so you don't need to add line breaks to make text fit on the page.
+
+
+
+///
+
+
+
+### Headers
+
+    # Header 1
+    ## Header 2
+    ### Header 3
+    #### Header 4
+    ##### Header 5
+    ###### Header 6
+
+# Header 1
+## Header 2
+### Header 3
+#### Header 4
+##### Header 5
+###### Header 6
+
+    Alternate Header 1
+    ==================
+
+    Alternate Header 2
+    ------------------
+
+Alt Header 1
+============
+
+Alt Header 2
+------------
+
+
+
+///
+
+
+
+### Bold and Italics
+
+    _this is italic_, and *so is this*
+    __this is bold__, and **so is this**
+    _**this is both bold and italic**_
+
+_this is italic_, and *so is this*
+__this is bold__, and **so is this**
+_**this is both bold and italic**_
+
+
+
+///
+
+
+
+### Strikethrough
+
+    ~~put a line through text like this~~
+
+~~put a line through text like this~~
+
+
+
+///
+
+
+
+### Lists
+
+    Shopping
+    - bananas
+    - tomatoes
+    - grapes
+      - red grapes
+      - green grapes
+    - peaches
+
+Shopping
+- bananas
+- tomatoes
+- grapes
+  - red grapes
+  - green grapes
+- peaches
+
+///
+
+### Ordered Lists
+
+    The Four Steps to Success
+    1. make some notes
+    2. put li.js import at the top
+    3. add markdown syntax
+    4. save as .html
+
+The Four Steps to Success
+1. make some notes
+2. put li.js import at the top
+3. add markdown syntax
+4. save as .html
+
+///
+
+### Checklists
+
+    To Do
+    - [x] walk the dog
+    - [x] feed the cat
+    - [ ] find the unicorn
+
+To Do
+- [x] walk the dog
+- [x] feed the cat
+- [ ] find the unicorn
+
+///
+
+
+
+### Links
+
+    [inline hyperlink](https://www.example.com)
+
+[inline hyperlink](https://www.example.com)
+
+
+
+///
+
+
+
+### Inline Code
+
+    Write `inline code` with `back-ticks`.
+
+Write `inline code` with `back-ticks`.
+
+///
+
+### Code Blocks
+
+    make a block of code by indenting with a tab or four spaces and leaving a blank line underneath:
+
+        function example(f) {
+            return "I like recursion, because " + f(f);
+        }
+        console.log(example(example));
+
+
+make a block of code by indenting with a tab or four spaces and leaving a blank line underneath:
+
+    function example(f) {
+        return "I like recursion, because " + f(f);
+    }
+    console.log(example(example));
+
+///
+
+Alternatively use three back ticks so you don't have to indent every line. Note that if the code is longer than the box the user can scroll to the side to see the full code.
+
+    My amazing function:
+    ```
+    window.addEventListener('mousemove', function(e){
+        var red = 255 * e.clientX/window.innerWidth;
+        var blue = 255 * e.clientY/window.innerHeight;
+        document.querySelector("body").style.background = `rgb(${red},0,${blue})` });
+    ```
+
+My amazing function:
+```
+window.addEventListener('mousemove', function(e){
+    var red = 255 * e.clientX/window.innerWidth;
+    var blue = 255 * e.clientY/window.innerHeight;
+    document.querySelector("body").style.background = `rgb(${red},0,${blue})` });
+```
+
+
+
+///
+
+
+
+### Emoji
+
+Reference an emoji with its short code. Note: Emojis may not work if there are no other unicode symbols in the document. This can be fixed by adding a \§ (or any other unicode symbol) anywhere in the document. Also, be aware that emojis look different on different operating systems.
+
+    :smile: :dog: :bulb: :house: :joy:
+
+:smile: :dog: :bulb: :house: :joy:
+
+
+///
+
+
+
+# li.js Syntax
+
+
+
+///
+
+
+
+### Spacers
+
+Make small spacer (1/10th of the page height) with:
+
+```
+\///
+```
+
+Make a large spacer (1/2 the page height) with:
+
+```
+\///\///
+```
+
+
+
+///
+
+
+
+### Text Colour
+
+    Colour inline text with <#f00:hex> <#00ff00:codes>, or &lt; rgb(0,0,255):rgb codes&gt;.
+
+Colour inline text with <#f00:hex> <#00ff00:codes>, or &lt; rgb(0,0,255):rgb codes&gt;.
+
+
+
+///
+
+
+
+### \§
+
+\§ is a shortcut for a non-breaking space. It can be typed with _**Alt + 1 + 2**_ on Windows. It's useful for forcing text to be spaced out (because the browser removes extra spaces) and can help in cases where normal spaces cause Markdown to break.
+
+    start
+    \§ |
+    \§ V
+    finish
+
+start
+§ |
+§ V
+finish
+
+
+
+///
+
+
+
+### Arrows
+
+    --> <-- <--> <->
+    ==> <== <==> <=>
+
+--> <-- <--> <->
+==> <== <==> <=>
+
+
+
+///
+
+
+
+# li.js Functions
+
+li.js functions are used
+
+
+
+///
+
+
+
+### li.big
+
+    \@li.big Hello!
+
+@li.big Hello!
+
+
+
+///
+
+
+
+### li.centre
+
+    \@li.center This text is centred
+
+@li.center This text is centred
+
+
+
+///
+
+
+
+### li.font
+
+li.font changes the font for the _entire_ document. It takes either one or two arguments. The first is the name of the font, and the second is the import url. The url is not needed if the font is from [Google Fonts](https://fonts.google.com/).
+
+Below a new font is imported and set for the entire document, then the default font is restored (Source Code Pro), and inline HTML is used to set the font for a single paragraph.
+
+    \@li.font(Permanent Marker)
+    \@li.font(Source Code Pro)
+    &lt;span style="font-family: 'Permanent Marker'"&gt;Hello there,
+    I changed the font.&lt;/span&gt;
+
+@li.font(Permanent Marker)
+@li.font(Source Code Pro)
+<span style="font-family: 'Permanent Marker'">Hello there,
+I changed the font.</span>
+
+
+///
+
+
+
+### li.table
+
+li.table can be used with comma separated values (CSV) and tab separated values (TSV), which means you can copy and paste most tables into your text editor and they'll work without reformatting.
+
+    \@li.table
+    Month,Location,Profit
+    2018-10,London,134.05
+    2018-10,New York,<#f00:-23.45>
+    2018-11,London,154.60
+    2018-11,New York,243.23
+    2018-12,London,294.33
+    2018-12,New York,324.32
+    2019-01,London,243.03
+    2019-01,New York,144.23
+    2019-01,Tokyo,145.20
+
+@li.table
+Month,Location,Profit
+2018-10,London,134.05
+2018-10,New York,<#f00:-23.45>
+2018-11,London,154.60
+2018-11,New York,243.23
+2018-12,London,294.33
+2018-12,New York,324.32
+2019-01,London,243.03
+2019-01,New York,144.23
+2019-01,Tokyo,145.20
+
+
+
+///
+
+
+
+### li.tooltip
+
+    Tooltips can be used to add \@li.tooltip(more information: like this) in the middle of a paragraph.
+
+Tooltips can be used to add @li.tooltip(more information: like this) in the middle of a paragraph.

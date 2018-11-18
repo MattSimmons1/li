@@ -159,25 +159,28 @@ document.addEventListener('DOMContentLoaded', function(){
 
     //colour tags - rgb version (may have been converted to HTML tags by the browser)
     md = md.replace(/(?<!\\)< *rgb(.*?):(.*?)>/g, "<span style='color:rgb$1;'>$2</span>");
-    md = md.replace(/(?<!\\)&lt; *rgb(.*?):(.*?)&gt;/g, "<span style='color:rgb$1;'>$2</span>");
+//    md = md.replace(/(?<!\\)&lt; *rgb(.*?):(.*?)&gt;/g, "<span style='color:rgb$1;'>$2</span>");
 
     // li.tooltip - TODO: something changes \) to ) which prevents \) detection
     md = md.replace(/(?<!\\)@li\.tooltip\((.*?)(?<!\\):(.*?)(?<!\\)\)/g, "<span class='li-tooltip'>$1<span class='li-tooltip-text'>$2</span></span>");
 
     // li.table
-    md = md.replace(/ *@li\.table *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toTable);
+    md = md.replace(/(?<!\\)@li\.table *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toTable);
+
+    // li.youtube
+    md = md.replace(/(?<!\\)@li\.[Yy]ou[Tt]ube\(([^,]*)(?: *, *(\d+|full|fullscreen))?\)/g, youTubeEmbed);
 
     // li.d3.force-bubble
-    md = md.replace(/ *(?<!\\)@li\.(?:d3\.)?force-bubble *\n((.*\n)*?)( *\n)/g, toForceBubble);
+    md = md.replace(/(?<!\\)@li\.(?:d3\.)?force-bubble *\n((.*\n)*?)( *\n)/g, toForceBubble);
 
     // li.d3.tree & li.d3.cluster
     md = md.replace(/ *(?<!\\)@li\.(?:d3\.)?(tree|cluster|cluster-no-separation) *\n((.*\n)*?)( *\n)/g, tree_o_matic);
 
     // li.big
-    md = md.replace(/ *@li\.big(.*)?\n/g, toBigText);
+    md = md.replace(/ *(?<!\\)@li\.big(.*)?\n/g, toBigText);
 
     // li.center
-    md = md.replace(/ *@li.cent(er|re)(.*)?\n/g, "<p style='text-align:center;'>$2</p>");
+    md = md.replace(/ *(?<!\\)@li.cent(er|re)(.*)?\n/g, "<p style='text-align:center;'>$2</p>");
 
     showdown.setFlavor('github');
     showdown.setOption('simpleLineBreaks', true);
@@ -255,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function(){
 function changeFont(match, font, url) {
     // if import is a url + name
     if (url) {
-        document.styleSheets[0].cssRules[1].style.setProperty("font-family", "'" + font + "', sans-serif");
+        getStyle('body').setProperty("font-family", "'" + font + "', sans-serif");
         if (!url.match(/["'].*/)) {
             url = "'" + url + "'";
         }
@@ -264,13 +267,21 @@ function changeFont(match, font, url) {
     // if import is name of a google font
     else {
         var fontName = font.replace("+", " ");
-        document.styleSheets[0].cssRules[1].style.setProperty("font-family", "'" + fontName + "', 'Source Code Pro'");
+        getStyle('body').setProperty("font-family", "'" + fontName + "', 'Source Code Pro'");
 
         var fontUrl = "'https://fonts.googleapis.com/css?family=" + fontName.replace(" ", "+") + "'";
         document.styleSheets[0].insertRule("@import " + fontUrl);
     }
 
     return ""
+}
+function getStyle(className) {
+    var classes = document.styleSheets[0].rules || document.styleSheets[0].cssRules;
+    for (var x = 0; x < classes.length; x++) {
+        if (classes[x].selectorText == className) {
+            return classes[x].style;
+        }
+    }
 }
 
 function toTable(match, headerRow, body, none, blankLine) {
@@ -315,6 +326,32 @@ function toFraktur(match, text, tag) {
         return index == -1 ? d : "&#x" + fraktur[index].toString(16);
     }).join("") + "</" + tag + ">");
 }
+
+function youTubeEmbed(match, videoId, size) {
+
+    videoId = videoId.trim();
+
+    const ratio = 16/9;
+
+    var mode = "normal";
+
+    var padding = 0,
+        width = typeof(size) === "undefined" ? 630 : parseInt(size),
+        height = width/ratio;
+
+    if (size == "full" || size == "fullscreen") {
+        height = window.innerHeight;
+        width = ratio * height;
+        padding = Math.abs(window.innerWidth - width)/2;
+    }
+    return `<div style="width: 100vw; display: grid; grid-template-columns: 1fr auto 1fr; margin: -10vw;">
+            <iframe id="ytplayer" type="text/html"
+             style="grid-column: 2;"
+             width="${width}" height="${height}"
+             src="https://www.youtube.com/embed/${videoId}?autoplay=0"
+             frameborder="0"></iframe></div>`
+}
+
 
 //
 // D3
