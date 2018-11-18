@@ -344,7 +344,7 @@ function youTubeEmbed(match, videoId, size) {
         width = ratio * height;
         padding = Math.abs(window.innerWidth - width)/2;
     }
-    return `<div style="width: 100vw; display: grid; grid-template-columns: 1fr auto 1fr; margin: -10vw;">
+    return `<div style="width: 100vw; display: grid; grid-template-columns: 1fr auto 1fr; margin-left: -10vw;">
             <iframe id="ytplayer" type="text/html"
              style="grid-column: 2;"
              width="${width}" height="${height}"
@@ -447,7 +447,9 @@ function drawTree(treeData, i) {
       .style("background", "white")
       .style("font-size", "10px sans-serif");
 
-    const g = svg.append("g");
+    var g = svg.append("g");
+
+    g.attr("transform", "translate(30,0)");
 
     const link = g.append("g")
       .attr("fill", "none")
@@ -487,7 +489,7 @@ function drawTree(treeData, i) {
 
     var {x, y, width, height} = g.node().getBBox();
 
-    width = window.innerWidth*0.8;
+    width = window.innerWidth*.8;
 
     svg
       .style("max-width", "100%")
