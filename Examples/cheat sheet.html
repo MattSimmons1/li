@@ -524,3 +524,78 @@ The British Isles
 
 
 //////
+
+
+
+### li.d3.sankey
+
+Creates a sankey diagram from @li.tooltip(CSV:comma separated values) or @li.tooltip(TSV:tab separated values) formatted text, where each row represents a link between two nodes of the sankey. The _source_ and _target_ should be the names of two different items that are linked by a line of thickness proportional to the _value_.
+
+    \@li.d3.sankey
+    source, target, value
+    big company, tech start up, 1
+    angel investor, tech start up, 1.5
+    angel investor, consulting firm, .5
+    medium company, tech start up, 0.3
+    medium company, ad agency, 0.3
+    medium company, consulting firm, 2
+    small company, tech start up, 0.5
+    small company, supplier, 1
+    big company, ad agency, 0.6
+    big company, supplier, 4
+
+§
+
+@li.d3.sankey
+source, target, value
+big company, tech start up, 1
+angel investor, tech start up, 1.5
+angel investor, consulting firm, .5
+medium company, tech start up, 0.3
+medium company, ad agency, 0.3
+medium company, consulting firm, 2
+small company, tech start up, 0.5
+small company, supplier, 1
+big company, ad agency, 0.6
+big company, supplier, 4
+
+§
+
+The same node can be the source and target of multiple paths.
+
+    \@li.d3.sankey
+    source, target, value
+    A,B,1
+    A,C,1
+    A,D,2
+    D,E,2
+    C,E,0.75
+    C,F,0.25
+    B,F,0.5
+    B,G,0.5
+    G,H,0.25
+    F,H,0.25
+    G,I,0.25
+    F,I,0.5
+    E,H,1.75
+    E,I,1
+
+§
+§
+
+@li.d3.sankey
+source, target, value
+A,B,1
+A,C,1
+A,D,2
+D,E,2
+C,E,0.75
+C,F,0.25
+B,F,0.5
+B,G,0.5
+G,H,0.25
+F,H,0.25
+G,I,0.25
+F,I,0.5
+E,H,1.75
+E,I,1

@@ -39,6 +39,7 @@ var css = `
     margin-left: auto;
     margin-right: auto;
     max-width: 80vw;
+    max-height: 80vw;
   }
   table {
     margin: 0 10vw 0 10vw;
@@ -121,6 +122,23 @@ var css = `
     position: absolute;
     pointer-events:none;
     visibility: hidden;
+  }
+  .li-sankey-node rect {
+    cursor: move;
+    fill-opacity: .9;
+    shape-rendering: crispEdges;
+  }
+  .li-sankey-node text {
+    pointer-events: none;
+    text-shadow: 0 1px 0 #fff;
+  }
+  .li-sankey-link {
+    fill: none;
+    stroke: #000;
+    stroke-opacity: .2;
+  }
+  .li-sankey-link:hover {
+    stroke-opacity: .5;
   }
 `
 
@@ -238,6 +256,9 @@ function convert(md) {
 
     // li.d3.force-bubble
     md = md.replace(/(?<!\\)@li\.(?:d3\.)?force-bubble *\n((.*\n)*?)( *\n)/g, toForceBubble);
+
+    // li.d3.sankey
+    md = md.replace(/(?<!\\)@li\.(?:d3\.)?sankey *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toSankey);
 
     // li.d3.tree & li.d3.cluster
     md = md.replace(/ *(?<!\\)@li\.(?:d3\.)?(tree|cluster|cluster-no-separation) *\n((.*\n)*?)( *\n)/g, tree_o_matic);
@@ -604,6 +625,10 @@ function renderD3() {
         d3.li.forceBubblesData.forEach(function(d, i){ drawForceBubbles(d, i) });
     }
 
+    // li.d3.sankey
+    if(d3.li.sankeyData) {
+        d3.li.sankeyData.forEach(function(d, i){ drawSankey(d, i) });
+    }
 }
 
 const d3Error = "<span style='color: red'>ERROR\nCould not create: D3 module not found. Import D3 at the top of the file with a tag like this: \n\n    &lt;script src='https://d3js.org/d3.v5.min.js'&gt;&lt;/script&gt;</span>\n";
@@ -620,7 +645,7 @@ function parseD3CSV(match, body, none, blankLine) {
     body = body.replace(/(?<!\\)\t/g, "__DELIM__");
     body = body.replace(/\\\t/g, "\t");
 
-    var data = body.split("\n").map(d => d.split("__DELIM__").map(d => parseFloat(d) ? parseFloat(d) : d));
+    var data = body.split("\n").map(d => d.split("__DELIM__").map(d => typeof(d) === "string" ? d.trim() : d ).map(d => parseFloat(d) ? parseFloat(d) : d));
 
     return data;
 }
@@ -735,6 +760,142 @@ function drawTree(treeData, i) {
     treeData.rendered = true;
 }
 
+// TODO: optional column: category --> categorical scale to colour links
+function toSankey(match, headerRow, body, none, blankLine) {
+    if (typeof(d3) === "undefined") return d3Error;
+
+    d3.sankey=function(){var sankey={},nodeWidth=24,nodePadding=8,size=[1,1],nodes=[],links=[];sankey.nodeWidth=function(_){if(!arguments.length)return nodeWidth;nodeWidth=+_;return sankey};sankey.nodePadding=function(_){if(!arguments.length)return nodePadding;nodePadding=+_;return sankey};sankey.nodes=function(_){if(!arguments.length)return nodes;nodes=_;return sankey};sankey.links=function(_){if(!arguments.length)return links;links=_;return sankey};sankey.size=function(_){if(!arguments.length)return size;size=_;return sankey};sankey.layout=function(iterations){computeNodeLinks();computeNodeValues();computeNodeBreadths();computeNodeDepths(iterations);computeLinkDepths();return sankey};sankey.relayout=function(){computeLinkDepths();return sankey};sankey.link=function(){var curvature=.5;function link(d){var x0=d.source.x+d.source.dx,x1=d.target.x,xi=d3.interpolateNumber(x0,x1),x2=xi(curvature),x3=xi(1-curvature),y0=d.source.y+d.sy+d.dy/2,y1=d.target.y+d.ty+d.dy/2;return"M"+x0+","+y0+"C"+x2+","+y0+" "+x3+","+y1+" "+x1+","+y1}
+link.curvature=function(_){if(!arguments.length)return curvature;curvature=+_;return link};return link};function computeNodeLinks(){nodes.forEach(function(node){node.sourceLinks=[];node.targetLinks=[]});links.forEach(function(link){var source=link.source,target=link.target;if(typeof source==="number")source=link.source=nodes[link.source];if(typeof target==="number")target=link.target=nodes[link.target];source.sourceLinks.push(link);target.targetLinks.push(link)})}
+function computeNodeValues(){nodes.forEach(function(node){node.value=Math.max(d3.sum(node.sourceLinks,value),d3.sum(node.targetLinks,value))})}
+function computeNodeBreadths(){var remainingNodes=nodes,nextNodes,x=0;while(remainingNodes.length){nextNodes=[];remainingNodes.forEach(function(node){node.x=x;node.dx=nodeWidth;node.sourceLinks.forEach(function(link){nextNodes.push(link.target)})});remainingNodes=nextNodes;++x}
+moveSinksRight(x);scaleNodeBreadths((window.innerWidth*0.8-nodeWidth)/(x-1))}
+function moveSourcesRight(){nodes.forEach(function(node){if(!node.targetLinks.length){node.x=d3.min(node.sourceLinks,function(d){return d.target.x})-1}})}
+function moveSinksRight(x){nodes.forEach(function(node){if(!node.sourceLinks.length){node.x=x-1}})}
+function scaleNodeBreadths(kx){nodes.forEach(function(node){node.x*=kx})}
+function computeNodeDepths(iterations){var nodesByBreadth=d3.nest().key(function(d){return d.x}).sortKeys(d3.ascending).entries(nodes).map(function(d){return d.values});initializeNodeDepth();resolveCollisions();for(var alpha=1;iterations>0;--iterations){relaxRightToLeft(alpha*=.99);resolveCollisions();relaxLeftToRight(alpha);resolveCollisions()}
+function initializeNodeDepth(){var ky=d3.min(nodesByBreadth,function(nodes){return(size[1]-(nodes.length-1)*nodePadding)/d3.sum(nodes,value)});nodesByBreadth.forEach(function(nodes){nodes.forEach(function(node,i){node.y=i;node.dy=node.value*ky})});links.forEach(function(link){link.dy=link.value*ky})}
+function relaxLeftToRight(alpha){nodesByBreadth.forEach(function(nodes,breadth){nodes.forEach(function(node){if(node.targetLinks.length){var y=d3.sum(node.targetLinks,weightedSource)/d3.sum(node.targetLinks,value);node.y+=(y-center(node))*alpha}})});function weightedSource(link){return center(link.source)*link.value}}
+function relaxRightToLeft(alpha){nodesByBreadth.slice().reverse().forEach(function(nodes){nodes.forEach(function(node){if(node.sourceLinks.length){var y=d3.sum(node.sourceLinks,weightedTarget)/d3.sum(node.sourceLinks,value);node.y+=(y-center(node))*alpha}})});function weightedTarget(link){return center(link.target)*link.value}}
+function resolveCollisions(){nodesByBreadth.forEach(function(nodes){var node,dy,y0=0,n=nodes.length,i;nodes.sort(ascendingDepth);for(i=0;i<n;++i){node=nodes[i];dy=y0-node.y;if(dy>0)node.y+=dy;y0=node.y+node.dy+nodePadding}
+dy=y0-nodePadding-size[1];if(dy>0){y0=node.y-=dy;for(i=n-2;i>=0;--i){node=nodes[i];dy=node.y+node.dy+nodePadding-y0;if(dy>0)node.y-=dy;y0=node.y}}})}
+function ascendingDepth(a,b){return a.y-b.y}}
+function computeLinkDepths(){nodes.forEach(function(node){node.sourceLinks.sort(ascendingTargetDepth);node.targetLinks.sort(ascendingSourceDepth)});nodes.forEach(function(node){var sy=0,ty=0;node.sourceLinks.forEach(function(link){link.sy=sy;sy+=link.dy});node.targetLinks.forEach(function(link){link.ty=ty;ty+=link.dy})});function ascendingSourceDepth(a,b){return a.source.y-b.source.y}
+function ascendingTargetDepth(a,b){return a.target.y-b.target.y}}
+function center(node){return node.y+node.dy/2}
+function value(link){return link.value}
+return sankey}
+
+    var data = parseD3CSV(match, body, none, blankLine);
+
+    data = data.map(function(d){ return {source: d[0], target: d[1], value: d[2]} })
+
+    //store data globally to be used after parsing has finished
+    if(!d3.li) {
+        d3.li = {};
+    }
+    if(!d3.li.sankeyData) {
+        d3.li.sankeyData = [{data}];
+    }
+    else {
+        d3.li.sankeyData.push({data});
+    }
+
+    let index = d3.li.sankeyData.length - 1;
+
+    return `<svg id='li-sankey-${index}'></svg>`;
+}
+
+function drawSankey(data, index) {
+
+    var width = window.innerWidth*.8;
+    var height = window.innerHeight*.6;
+
+    var svg = d3.select("body").select("svg#li-sankey-" + index)
+        .attr("width", width)
+        .attr("height", height)
+
+    var links = data.data;
+
+    // Set the sankey diagram properties
+    var sankey = d3.sankey()
+        .nodeWidth(10)
+        .nodePadding(40)
+        .size([width, height]);
+
+    var path = sankey.link();
+
+    var nodes = []
+
+    links.forEach(function(d) {
+         if(nodes.indexOf(d.source) < 0) {
+             nodes.push(d.source);
+         }
+         if(nodes.indexOf(d.target) < 0) {
+             nodes.push(d.target);
+         }
+    });
+
+    links = links.map(function(d){ return { source: nodes.indexOf(d.source), target: nodes.indexOf(d.target), value: d.value } })
+
+    nodes = nodes.map(function(d){ return {name: d, node: nodes.indexOf(d)} });
+
+    sankey
+      .nodes(nodes)
+      .links(links)
+      .layout(40);
+
+    // add in the links
+    var link = svg.append("g").selectAll(".link")
+        .data(links)
+      .enter().append("path")
+        .attr("class", "li-sankey-link")
+        .attr("d", path)
+        .style("stroke-width", function(d) { return Math.max(1, d.dy); })
+        .sort(function(a, b) { return b.dy - a.dy; });
+
+    // add in the nodes
+    var node = svg.append("g").selectAll(".node")
+        .data(nodes)
+      .enter().append("g")
+        .attr("class", "li-sankey-node")
+        .attr("transform", function(d) {
+  		    return "translate(" + d.x + "," + d.y + ")"; })
+      .call(d3.drag()
+        .on("start", function() {
+  		    this.parentNode.appendChild(this); })
+        .on("drag", dragmove));
+
+    // add the rectangles for the nodes
+    node.append("rect")
+        .attr("height", function(d) { return d.dy; })
+        .attr("width", sankey.nodeWidth())
+        .style("fill", "#282a2e");
+
+    // add in the title for the nodes
+    node.append("text")
+        .attr("x", -6)
+        .attr("y", function(d) { return d.dy / 2; })
+        .attr("dy", ".35em")
+        .attr("text-anchor", "end")
+        .attr("transform", null)
+        .text(function(d) { return d.name; })
+      .filter(function(d) { return d.x < width / 2; })
+        .attr("x", 6 + sankey.nodeWidth())
+        .attr("text-anchor", "start");
+
+    // the function for moving the nodes
+    function dragmove(d) {
+      d3.select(this).attr("transform",
+          "translate(" + d.x + "," + (
+                  d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))
+              ) + ")");
+      sankey.relayout();
+      link.attr("d", path);
+    }
+
+    links.rendered = true
+
+}
 
 function toForceBubble(match, body, none, blankLine) {
 
