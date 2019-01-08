@@ -39,7 +39,7 @@ var css = `
     margin-left: auto;
     margin-right: auto;
     max-width: 80vw;
-    max-height: 80vw;
+    max-height: 80vh;
   }
   table {
     margin: 0 10vw 0 10vw;
