@@ -1,5 +1,5 @@
 //
-// lightweight - li.js - Matt Simmons 2018 - version 0.3.0
+// lightweight - li.js - Matt Simmons 2018 - version 0.4.1
 //
 
 
@@ -103,6 +103,18 @@ var css = `
   }
   .li-tooltip:hover .li-tooltip-text {
     visibility: visible;
+  }
+  .li-centred-outer {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    padding 0;
+    margin 0;
+  }
+  .li-centred-inner {
+    grid-column: 2;
+    text-align: center;
+    padding 0;
+    margin 0;
   }
 
   .li-watermark {
@@ -266,17 +278,25 @@ function convert(md) {
     // li.big
     md = md.replace(/ *(?<!\\)@li\.big(.*)?\n?/g, toBigText);
 
-    // li.center
-    md = md.replace(/ *(?<!\\)@li.cent(er|re)(.*)?\n/g, "<p style='text-align:center;'>$2</p>");
-
     showdown.setFlavor('github');
     showdown.setOption('simpleLineBreaks', true);
     showdown.setOption('emoji', true);
     showdown.setOption('tables', true);
     showdown.setOption('tasklists', true);
+    showdown.setOption('ghMentions', false);
 
-    var converter = new showdown.Converter(),
-        html = converter.makeHtml(md);
+    var converter = new showdown.Converter();
+
+    // li.center()
+    md = md.replace(/ *(?<!\\)@li.cent(?:er|re) *\(((?:(?!\n\)\n)(?:.|\n))*)?\n *\)/g, function(_, content){
+        return "<div class='li-centred-outer'><div class='li-centred-inner'>" + converter.makeHtml(content) + "</div></div>"
+    });
+    // li.center
+    md = md.replace(/ *(?<!\\)@li.cent(?:er|re) *(.*)?\n/g, function(_, content){
+        return "<div class='li-centred-outer'><div class='li-centred-inner'>" + converter.makeHtml(content) + "</div></div>"
+    });
+
+    var html = converter.makeHtml(md);
 
     // ~PARSE HTML~
 

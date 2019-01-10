@@ -310,9 +310,21 @@ li.js functions can do some pretty amazing things. They are used by typing an _@
 
 ### li.centre
 
-    \@li.center This text is centred
+li.centre can be used to centre a single line of text or multiple lines if brackets are used. It is especially useful for centering HMTL, like an embedded tweet, that would otherwise be aligned with the left margin.
 
-@li.center This text is centred
+    \@li.centre This text is centred
+
+@li.centre This text is centred
+
+    \@li.centre(
+    &lt;blockquote class="twitter-tweet" data-lang="en">&lt;p lang="en" dir="ltr">SpaceX option package for new Tesla Roadster will include ~10 small rocket thrusters arranged seamlessly around car. These rocket engines dramatically improve acceleration, top speed, braking &amp; cornering. Maybe they will even allow a Tesla to fly …&lt;/p>mdash; Elon Musk (@elonmusk) &lt;a href="https://twitter.com/elonmusk/status/1005577738332172289?ref_src=twsrc%5Etfw">June 9, 2018&lt;/a>&lt;/blockquote>
+    &lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8">&lt;/script>
+    )
+
+@li.centre(
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">SpaceX option package for new Tesla Roadster will include ~10 small rocket thrusters arranged seamlessly around car. These rocket engines dramatically improve acceleration, top speed, braking &amp; cornering. Maybe they will even allow a Tesla to fly …</p>&mdash; Elon Musk (@elonmusk) <a href="https://twitter.com/elonmusk/status/1005577738332172289?ref_src=twsrc%5Etfw">June 9, 2018</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+)
 
 
 
