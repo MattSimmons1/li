@@ -135,6 +135,9 @@ var css = `
     pointer-events:none;
     visibility: hidden;
   }
+  .li-bar-chart {
+    fill: #282a2e;
+  }
   .li-sankey-node rect {
     cursor: move;
     fill-opacity: .9;
@@ -253,7 +256,11 @@ function convert(md) {
     // li.font
     md = md.replace(/(?<!\\)@li\.font\( *([\w ]*) *(?:, *(.*) *)?\)/g, changeFont);
 
-    //colour tags - rgb version (may have been converted to HTML tags by the browser)
+    // colours
+    md = md.replace(/(?<!\\)\( *((?:rgb\( *[0-9]{1,3} *, *[0-9]{1,3} *, *[0-9]{1,3} *\))|(?:#[0-9a-zA-Z]{3})|(?:#[0-9a-zA-Z]{6}) *):(.*?) *\)/g, "<span style='color:$1;'>$2</span>")
+    md = md.replace(/\\(\( *((?:rgb\( *[0-9]{1,3} *, *[0-9]{1,3} *, *[0-9]{1,3} *\))|(?:#[0-9a-zA-Z]{3})|(?:#[0-9a-zA-Z]{6}) *):)/g, "$1")
+
+    //colour tags - rgb version (may have been converted to HTML tags by the browser) - DEPRECIATED
     md = md.replace(/(?<!\\)< *rgb(.*?):(.*?)>/g, "<span style='color:rgb$1;'>$2</span>");
 //    md = md.replace(/(?<!\\)&lt; *rgb(.*?):(.*?)&gt;/g, "<span style='color:rgb$1;'>$2</span>");
 
@@ -268,6 +275,9 @@ function convert(md) {
 
     // li.d3.force-bubble
     md = md.replace(/(?<!\\)@li\.(?:d3\.)?force-bubble *\n((.*\n)*?)( *\n)/g, toForceBubble);
+
+    // li.d3.bar-chart
+    md = md.replace(/(?<!\\)@li\.(?:d3\.)?bar-chart *\n((.*\n)*?)( *\n)/g, toBarChart);
 
     // li.d3.sankey
     md = md.replace(/(?<!\\)@li\.(?:d3\.)?sankey *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toSankey);
@@ -310,7 +320,7 @@ function convert(md) {
     // li.fraktur
     html = html.replace(/<.+> *@li\.fraktur (.*)<\/(.+)>/g, toFraktur);
 
-    // colour tags - hex version
+    // colour tags - hex version - DEPRECIATED
     html = html.replace(/(?<!\\)< *#(.*?):(.*?)>/g, "<span style='color:#$1;'>$2</span>");
 
     // unescape chars the user escaped
@@ -645,6 +655,11 @@ function renderD3() {
         d3.li.forceBubblesData.forEach(function(d, i){ drawForceBubbles(d, i) });
     }
 
+    // li.d3.bar-chart
+    if(d3.li.barChartData) {
+        d3.li.barChartData.forEach(function(d, i){ drawBarChart(d, i) });
+    }
+
     // li.d3.sankey
     if(d3.li.sankeyData) {
         d3.li.sankeyData.forEach(function(d, i){ drawSankey(d, i) });
@@ -917,6 +932,63 @@ function drawSankey(data, index) {
 
 }
 
+function toBarChart(match, body, none, blankLine) {
+
+    if (typeof(d3) === "undefined") return d3Error;
+
+    var data = parseD3CSV(match, body, none, blankLine);
+
+    //store data globally to be used after parsing has finished
+    if(!d3.li) {
+        d3.li = {}
+    }
+    if(!d3.li.barChartData) {
+        d3.li.barChartData = [{data}];
+    }
+    else {
+        d3.li.barChartData.push({data});
+    }
+
+    let index = d3.li.barChartData.length - 1;
+
+    return `<svg id='li-bar-chart-${index}'></svg>`;
+}
+function drawBarChart(barChartData, i) {
+
+    //don't render if it's already been rendered
+    if(barChartData.rendered) return;
+
+    var headers = barChartData.data.shift()
+
+    barChartData.data.forEach(d => [d[0].toString(), parseFloat(d[1])])
+    console.log(barChartData.data)
+
+    const w = window.innerWidth*.8;
+    const h = window.innerHeight*.8;
+
+    const scale = d3.scaleLinear()
+      .domain([d3.max(barChartData.data, d => d[1]), 0])
+      .range([0, 0.9*h]);
+
+    const svg = d3.select("body").select("svg#li-bar-chart-" + i)
+      .style("height", h)
+      .style("width", w);
+
+    var bars = svg.selectAll("rect")
+      .data(barChartData.data)
+      .enter().append("rect");
+
+    bars
+      .attr("class", "li-bar-chart")
+      .attr("x", (d, i) => i/barChartData.data.length*w)
+      .attr("y", d => scale(d[1]))
+      .attr("width", w/barChartData.data.length - 2)
+      .attr("height", d => scale(0) - scale(d[1]))
+
+
+
+}
+
 function toForceBubble(match, body, none, blankLine) {
 
     if (typeof(d3) === "undefined") return d3Error;
@@ -938,7 +1010,6 @@ function toForceBubble(match, body, none, blankLine) {
 
     return `<svg id='force-bubbles-${index}'></svg>`;
 }
-
 function drawForceBubbles(bubblesData, i) {
 
     //don't render if it's already been rendered
@@ -976,7 +1047,7 @@ function drawForceBubbles(bubblesData, i) {
       .data(bubblesData.data)
       .enter().append("circle")
         .attr("r", function(d){ return scale(Math.sqrt(d[1])); })
-        .style("fill", function(d){ return d[2] ? colourScale(d[2]) : "#555"; })
+        .style("fill", function(d){ return d[2] ? colourScale(d[2]) : "#282a2e"; })
         .style("stroke", "#fff")
         .style("stroke-width", 1)
         .call(d3.drag()
