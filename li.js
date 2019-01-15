@@ -276,8 +276,8 @@ function convert(md) {
     // li.d3.force-bubble
     md = md.replace(/(?<!\\)@li\.(?:d3\.)?force-bubble *\n((.*\n)*?)( *\n)/g, toForceBubble);
 
-    // li.d3.bar-chart
-    md = md.replace(/(?<!\\)@li\.(?:d3\.)?bar-chart *\n((.*\n)*?)( *\n)/g, toBarChart);
+//    // li.d3.bar-chart
+//    md = md.replace(/(?<!\\)@li\.(?:d3\.)?bar-chart *\n((.*\n)*?)( *\n)/g, toBarChart);
 
     // li.d3.sankey
     md = md.replace(/(?<!\\)@li\.(?:d3\.)?sankey *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toSankey);
