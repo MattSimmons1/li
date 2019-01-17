@@ -276,8 +276,8 @@ function convert(md) {
     // li.d3.force-bubble
     md = md.replace(/(?<!\\)@li\.(?:d3\.)?force-bubble *\n((.*\n)*?)( *\n)/g, toForceBubble);
 
-//    // li.d3.bar-chart
-//    md = md.replace(/(?<!\\)@li\.(?:d3\.)?bar-chart *\n((.*\n)*?)( *\n)/g, toBarChart);
+    // li.d3.bar-chart
+    md = md.replace(/(?<!\\)@li\.(?:d3\.)?bar-chart *\n((.*\n)*?)( *\n)/g, toBarChart);
 
     // li.d3.sankey
     md = md.replace(/(?<!\\)@li\.(?:d3\.)?sankey *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toSankey);
@@ -680,7 +680,7 @@ function parseD3CSV(match, body, none, blankLine) {
     body = body.replace(/(?<!\\)\t/g, "__DELIM__");
     body = body.replace(/\\\t/g, "\t");
 
-    var data = body.split("\n").map(d => d.split("__DELIM__").map(d => typeof(d) === "string" ? d.trim() : d ).map(d => parseFloat(d) ? parseFloat(d) : d));
+    var data = body.split("\n").map(d => d.split("__DELIM__").map(d => typeof(d) === "string" ? d.trim() : d ).map(d => /^\d+$/.test(d) ? parseFloat(d) : d));
 
     return data;
 }
@@ -958,32 +958,87 @@ function drawBarChart(barChartData, i) {
     //don't render if it's already been rendered
     if(barChartData.rendered) return;
 
-    var headers = barChartData.data.shift()
+    const headers = barChartData.data.shift()
+    const measures = headers.length - 1;
+    var measure = 1;
 
     barChartData.data.forEach(d => [d[0].toString(), parseFloat(d[1])])
-    console.log(barChartData.data)
+//    console.log(barChartData.data)
+//    console.log(headers)
 
     const w = window.innerWidth*.8;
     const h = window.innerHeight*.8;
+    const ym = 20;
+    const xm = 40;
 
     const scale = d3.scaleLinear()
       .domain([d3.max(barChartData.data, d => d[1]), 0])
-      .range([0, 0.9*h]);
+      .range([xm, 0.9*h]);
+
+    const iScale = d3.scaleLinear()
+      .domain([0, barChartData.data.length])
+      .range([xm*2, w - xm*2]);
 
     const svg = d3.select("body").select("svg#li-bar-chart-" + i)
       .style("height", h)
       .style("width", w);
 
-    var bars = svg.selectAll("rect")
+    const bars = svg.selectAll("rect")
       .data(barChartData.data)
       .enter().append("rect");
 
     bars
       .attr("class", "li-bar-chart")
-      .attr("x", (d, i) => i/barChartData.data.length*w)
+      .attr("x", (d, i) => iScale(i))
       .attr("y", d => scale(d[1]))
-      .attr("width", w/barChartData.data.length - 2)
+      .attr("width", iScale(1) - iScale(0) - 1)
       .attr("height", d => scale(0) - scale(d[1]))
+
+    svg
+      .on("click", changeMeasure)
+
+    function changeMeasure(){
+
+        measure = ++measure > measures ? 1 : measure;
+
+        bars
+          .transition()
+          .duration(500)
+          .delay((d, i) => i*5)
+            .attr("y", d => scale(d[measure]))
+            .attr("height", d => scale(0) - scale(d[measure]))
+
+        header.text(headers[measure])
+    }
+
+    svg.selectAll("text")
+      .data(barChartData.data)
+      .enter().append("text")
+        .text(d => d[0])
+        .attr("x", (d, i) => iScale(i) + (iScale(0.5) - iScale(0)))
+        .attr("y", h*.9 + ym)
+
+    var yAxis = svg.append("g")
+      .attr("transform", "translate("+ xm*1.5 +",0)")
+      .attr("class", "axis")
+      .style("stroke-width", 1)
+      .style("stroke", "#282a2e")
+      .call(d3.axisLeft()
+        .scale(scale));
+
+    const header = svg
+      .append("text")
+//      .style("x", xm)
+//      .style("y", h/2)
+      .attr("transform", `translate(${xm/2},${h/2}) rotate(-90)`)
+      .text(headers[measure])
+
+//    var xAxis = svg.append("g")
+//      .attr("transform", "translate("+ m +","+ (h + m) +")")
+//      .attr("class", "axis")
+//      .style("stroke-width", 1)
+//      .call(d3.axisBottom()
+//        .scale(x));
 
 
 
