@@ -149,11 +149,16 @@ var css = `
   }
   .li-sankey-link {
     fill: none;
-    stroke: #000;
-    stroke-opacity: .2;
+    stroke-opacity: .4;
   }
   .li-sankey-link:hover {
-    stroke-opacity: .5;
+    stroke-opacity: .7;
+  }
+  .tick text {
+    font-weight: lighter;
+    font-family: 'Source Code Pro';
+    color: #282a2e;
+    stroke: none;
   }
 `
 
@@ -283,7 +288,7 @@ function convert(md) {
     md = md.replace(/(?<!\\)@li\.(?:d3\.)?sankey *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toSankey);
 
     // li.d3.tree & li.d3.cluster
-    md = md.replace(/ *(?<!\\)@li\.(?:d3\.)?(tree|cluster|cluster-no-separation) *\n((.*\n)*?)( *\n)/g, tree_o_matic);
+    md = md.replace(/ *(?<!\\)@li\.(?:d3\.)?(tree|cluster|cluster-no-separation|radial-tree) *\n((.*\n)*?)( *\n)/g, tree_o_matic);
 
     // li.big
     md = md.replace(/ *(?<!\\)@li\.big(.*)?\n?/g, toBigText);
@@ -722,13 +727,17 @@ function tree(data, algorithm) {
     root.dx = 10;
     root.dy = window.innerWidth*0.8 / (root.height + 1);
     let layout;
-
+//algorithm = "radial-tree"
     switch (algorithm) {
-        case "cluster": layout = d3.cluster(); break;
-        case "cluster-no-separation": layout = d3.cluster().separation(() => 1); break;
-        case "tree": layout = d3.tree(); break;
+        case "cluster": layout = d3.cluster().nodeSize([root.dx * 1.4, root.dy]); break;
+        case "cluster-no-separation": layout = d3.cluster().separation(() => 1).nodeSize([root.dx * 1.4, root.dy]); break;
+        case "tree": layout = d3.tree().nodeSize([root.dx * 1.4, root.dy]); break;
+        case "radial-tree": layout = d3.tree().separation(function(a, b){ return (a.parent == b.parent ? 1 : 2) / a.depth; }).size([2 * Math.PI, (.8*window.innerHeight)/2 - 20]);
     }
-    return layout.nodeSize([root.dx * 1.4, root.dy])(root);
+    return layout(root);
+}
+function radialPoint(x, y) {
+  return [(y = +y) * Math.cos(x -= Math.PI / 2), y * Math.sin(x)];
 }
 function drawTree(treeData, i) {
 
@@ -739,15 +748,13 @@ function drawTree(treeData, i) {
 
     const svg = d3.select("body").select("svg#tree-" + i)
       .style("background", "white")
-      .style("font-size", "10px sans-serif");
+      .style("font-size", "10px");
 
     var g = svg.append("g");
 
-    g.attr("transform", "translate(30,0)");
-
     const link = g.append("g")
       .attr("fill", "none")
-      .attr("stroke", "#555")
+      .attr("stroke", "#282a2e")
       .attr("stroke-opacity", 0.4)
       .attr("stroke-width", 1.5)
     .selectAll("path")
@@ -757,8 +764,7 @@ function drawTree(treeData, i) {
           M${d.target.y},${d.target.x}
           C${d.source.y + root.dy / 2},${d.target.x}
            ${d.source.y + root.dy / 2},${d.source.x}
-           ${d.source.y},${d.source.x}
-        `);
+           ${d.source.y},${d.source.x}`)
 
     const node = g.append("g")
       .attr("stroke-linejoin", "round")
@@ -768,29 +774,35 @@ function drawTree(treeData, i) {
       .enter().append("g")
         .attr("transform", d => `translate(${d.y},${d.x})`);
 
+    if (treeData.algorithm == "radial-tree") {
+        link
+          .attr("d", d3.linkRadial()
+            .angle(function(d){ return d.x; })
+            .radius(function(d){ return d.y; }))
+
+        node.attr("transform", function(d){ return "translate(" + radialPoint(d.x, d.y) + ")"; });
+    }
+
     node.append("circle")
-      .attr("fill", d => d.children ? "#555" : "#999")
-      .attr("r", 2.5);
+      .attr("fill", d => d.children ? "#282a2e" : "#999")
+      .attr("r", 4);
 
     node.append("text")
       .attr("dy", "0.31em")
-      .attr("x", d => d.children ? -6 : 6)
-      .text(d => d.data.name)
-      .filter(d => d.children)
+      .attr("x", d => d.children || (treeData.algorithm == "radial-tree" && radialPoint(d.x, d.y)[0] < d3.max(root.descendants().reverse(), d => d.x)/2) ? -6 : 6)
+      .text(d => d.data.name == "&nbsp;" ? "" : d.data.name)
+      .filter(d => d.children || (treeData.algorithm == "radial-tree" && radialPoint(d.x, d.y)[0] < d3.max(root.descendants().reverse(), d => d.x)/2))
         .attr("text-anchor", "end")
       .clone(true).lower()
         .attr("stroke", "white");
 
-    var {x, y, width, height} = g.node().getBBox();
-
-    width = window.innerWidth*.8;
+    const {x, y, width, height} = g.node().getBBox();
 
     svg
-      .style("max-width", "100%")
-      .style("height", "auto")
-      .attr("width", width + 10)
-      .attr("height", height + 10)
-      .attr("viewBox", `${x - 5} ${y - 5} ${width + 10} ${height + 10}`);
+      .style("max-width", "80vw")
+      .attr("width", "80vw")
+      .attr("height", height)
+      .attr("viewBox", `${x} ${y} ${width} ${height}`);
 
     treeData.rendered = true;
 }
@@ -821,8 +833,7 @@ function value(link){return link.value}
 return sankey}
 
     var data = parseD3CSV(match, body, none, blankLine);
-
-    data = data.map(function(d){ return {source: d[0], target: d[1], value: d[2]} })
+    data = data.map(function(d){ return {source: d[0], target: d[1], value: d[2], colour: d[3]}})
 
     //store data globally to be used after parsing has finished
     if(!d3.li) {
@@ -884,6 +895,7 @@ function drawSankey(data, index) {
         .data(links)
       .enter().append("path")
         .attr("class", "li-sankey-link")
+        .style("stroke", d => data.data.filter(e => e.source == d.source.name && e.target == d.target.name)[0].colour || "#686a6e")
         .attr("d", path)
         .style("stroke-width", function(d) { return Math.max(1, d.dy); })
         .sort(function(a, b) { return b.dy - a.dy; });
@@ -959,12 +971,19 @@ function drawBarChart(barChartData, i) {
     if(barChartData.rendered) return;
 
     const headers = barChartData.data.shift()
+
+    const ci = headers.indexOf("colour") > -1 ? headers.indexOf("colour") : headers.indexOf("color");
+    const colours = []
+
+    if (ci > -1) {
+        headers.splice(ci, 1)
+        barChartData.data.forEach(d => colours.push(d.splice(ci, 1)))
+    }
+
     const measures = headers.length - 1;
     var measure = 1;
 
     barChartData.data.forEach(d => [d[0].toString(), parseFloat(d[1])])
-//    console.log(barChartData.data)
-//    console.log(headers)
 
     const w = window.innerWidth*.8;
     const h = window.innerHeight*.8;
@@ -972,7 +991,7 @@ function drawBarChart(barChartData, i) {
     const xm = 40;
 
     const scale = d3.scaleLinear()
-      .domain([d3.max(barChartData.data, d => d[1]), 0])
+      .domain([d3.max(barChartData.data, d => d[1]), Math.min(d3.min(barChartData.data, d => d[1]), 0)])
       .range([xm, 0.9*h]);
 
     const iScale = d3.scaleLinear()
@@ -989,24 +1008,24 @@ function drawBarChart(barChartData, i) {
 
     bars
       .attr("class", "li-bar-chart")
+      .style("fill", (d, i) => colours[i] || "#282a2e")
       .attr("x", (d, i) => iScale(i))
-      .attr("y", d => scale(d[1]))
+      .attr("y", d => d[1] < 0 ? scale(0) : scale(d[1]))
       .attr("width", iScale(1) - iScale(0) - 1)
-      .attr("height", d => scale(0) - scale(d[1]))
+      .attr("height", d => Math.abs(scale(0) - scale(d[1])));
 
     svg
       .on("click", changeMeasure)
 
-    function changeMeasure(){
+    function changeMeasure() {
 
         measure = ++measure > measures ? 1 : measure;
 
         bars
           .transition()
-          .duration(500)
-          .delay((d, i) => i*5)
-            .attr("y", d => scale(d[measure]))
-            .attr("height", d => scale(0) - scale(d[measure]))
+          .duration(500) // TODO: if value changes sign, transition height to 0 before moving y
+            .attr("y", d => d[measure] < 0 ? scale(0) : scale(d[measure]))
+            .attr("height", d => Math.abs(scale(0) - scale(d[measure])));
 
         header.text(headers[measure])
     }
@@ -1016,7 +1035,7 @@ function drawBarChart(barChartData, i) {
       .enter().append("text")
         .text(d => d[0])
         .attr("x", (d, i) => iScale(i) + (iScale(0.5) - iScale(0)))
-        .attr("y", h*.9 + ym)
+        .attr("y", h*.9 + ym);
 
     var yAxis = svg.append("g")
       .attr("transform", "translate("+ xm*1.5 +",0)")
@@ -1028,19 +1047,8 @@ function drawBarChart(barChartData, i) {
 
     const header = svg
       .append("text")
-//      .style("x", xm)
-//      .style("y", h/2)
       .attr("transform", `translate(${xm/2},${h/2}) rotate(-90)`)
       .text(headers[measure])
-
-//    var xAxis = svg.append("g")
-//      .attr("transform", "translate("+ m +","+ (h + m) +")")
-//      .attr("class", "axis")
-//      .style("stroke-width", 1)
-//      .call(d3.axisBottom()
-//        .scale(x));
-
-
 
 }
 

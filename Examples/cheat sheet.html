@@ -18,7 +18,7 @@ Text in markdown is automatically put into paragraphs, so you don't need to add 
 
 
 
-///
+/// ///
 
 
 
@@ -44,15 +44,15 @@ Text in markdown is automatically put into paragraphs, so you don't need to add 
     Alternate Header 2
     ------------------
 
-Alt Header 1
+Alternate Header 1
 ============
 
-Alt Header 2
+Alternate Header 2
 ------------
 
 
 
-///
+/// ///
 
 
 
@@ -68,7 +68,7 @@ _**this is both bold and italic**_
 
 
 
-///
+/// ///
 
 
 
@@ -80,7 +80,7 @@ _**this is both bold and italic**_
 
 
 
-///
+/// ///
 
 
 
@@ -102,7 +102,7 @@ Shopping
   - green grapes
 - peaches
 
-///
+/// ///
 
 ### Ordered Lists
 
@@ -118,7 +118,7 @@ The Four Steps to Success
 3. add markdown syntax
 4. save as .html
 
-///
+/// ///
 
 ### Checklists
 
@@ -132,7 +132,9 @@ To Do
 - [x] feed the cat
 - [ ] find the unicorn
 
-///
+
+
+/// ///
 
 
 
@@ -144,7 +146,7 @@ To Do
 
 
 
-///
+/// ///
 
 
 
@@ -154,7 +156,7 @@ To Do
 
 Write `inline code` with `back-ticks`.
 
-///
+/// ///
 
 ### Code Blocks
 
@@ -195,7 +197,7 @@ window.addEventListener('mousemove', function(e){
 
 
 
-///
+/// ///
 
 
 
@@ -208,15 +210,17 @@ Reference an emoji with its short code. Note: Emojis may not work if there are n
 :smile: :dog: :bulb: :house: :joy:
 
 
-/// ///
+/// /// ///
 
 
 
 # li.js Syntax
 
+The following syntax is specific to li.js.
 
 
-///
+
+/// ///
 
 
 
@@ -236,7 +240,7 @@ Make a large spacer (1/2 the page height) with:
 
 
 
-///
+/// ///
 
 
 
@@ -248,8 +252,7 @@ Colour inline text with ( #b13f35: hex ) ( #46f: codes ) or ( rgb(113, 187, 32):
 
 
 
-
-///
+/// ///
 
 
 
@@ -269,7 +272,7 @@ finish
 
 
 
-///
+/// ///
 
 
 
@@ -283,7 +286,7 @@ finish
 
 
 
-///
+/// /// ///
 
 
 
@@ -293,7 +296,7 @@ li.js functions can do some pretty amazing things. They are used by typing an _@
 
 
 
-///
+/// ///
 
 
 
@@ -305,7 +308,7 @@ li.js functions can do some pretty amazing things. They are used by typing an _@
 
 
 
-///
+/// ///
 
 
 
@@ -329,7 +332,7 @@ li.centre can be used to centre a single line of text or multiple lines if brack
 
 
 
-///
+/// ///
 
 
 
@@ -350,7 +353,7 @@ Below a new font is imported and set for the entire document, then the default f
 I changed the font.</span>
 
 
-///
+/// ///
 
 
 
@@ -384,7 +387,7 @@ Month,Location,Profit
 
 
 
-///
+/// ///
 
 
 
@@ -395,8 +398,7 @@ Month,Location,Profit
 Tooltips can be used to add @li.tooltip(more information: like this) in the middle of a paragraph.
 
 
-
-///
+/// ///
 
 
 
@@ -421,7 +423,47 @@ li.js can be combined with the JavaScript library [D3.js](https://d3js.org) to m
 
 
 
-///
+/// ///
+
+
+
+# li.d3.bar-chart
+
+Creates a bar chart from @li.tooltip(CSV:comma separated values) or @li.tooltip(TSV:tab separated values) formatted text. The first column must contain the label for each bar. The other columns provide the values given to each bar. If there are multiple columns of values they can be transitioned between by **clicking** on the chart. An optional colour (or color) column can be added to set a colour for each bar.
+
+    \@li.d3.bar-chart
+    Month, 2018 profits (£M), 2017 profits (£M), colour
+    J, 10, 8
+    F, 12, 11
+    M, 7,  5
+    A, 2,  1, #f33
+    M, 6,  3
+    J, 8,  13
+    J, 12, 6
+    A, 11, 11
+    S, 18, 13
+    O, 10, 14
+    N, 24, 18
+    D, 42, 24
+
+@li.d3.bar-chart
+Month, 2018 profits (£M), 2017 profits (£M), colour
+J, 10, 8
+F, 12, 11
+M, 7,  5
+A, 2,  1, #f33
+M, 6,  3
+J, 8,  13
+J, 12, 6
+A, 11, 11
+S, 18, 13
+O, 10, 14
+N, 24, 18
+D, 42, 24
+
+
+
+/// ///
 
 
 
@@ -440,31 +482,7 @@ Converts data on the lines below to a tree diagram. The spaces before each node 
          Nucleariida
          chytrids
          microsporidia
-         Hyaloraphidium
-         Fonticula
-         Rozellida
-        Holozoa
-         Mesomycetozoea
-          Dermocystida
-          Ichthyophonida
-          Eccrinales
-          Amoebidiales
-         Corallochytrium
-         Filozoa
-          Filasterea
-          Choanoflagellata
-          Animalia
-      Rhizaria
-      Chromalveolata
-      Archaeplastida
-     Bacteria
-      Acidobacteria
-      Actinobacteria
-      Aquificae
-     Archaea
-      Euryarchaeota
-      DPANN
-      Proteoarchaeota
+         ...
 
 @li.d3.tree
 Life
@@ -506,7 +524,7 @@ Life
 
 
 
-///
+/// ///
 
 
 
@@ -515,44 +533,167 @@ Life
     \@li.d3.cluster
     The British Isles
      United Kingdom
-      Great Britain
-       Scotland
-       England
-       Wales
-      Northern Ireland
-     Ireland
-     Isle of Man
+      England
+       Isle of Wight
+       Isle of Sheppey
+       Hayling Island
+       ...
 
 @li.d3.cluster
 The British Isles
  United Kingdom
+  England
+   Isle of Wight
+   Isle of Sheppey
+   Hayling Island
+   Foulness Island
+   Portsea Island
+   Canvey Island
+   Mersea Island
+   Walney Island
+   Lundy
+   Thorney Island
+   Isles of Scilly
+    St Mary's
+    Tresco
+    St Martin's
+    St Agnes
+    Bryher
   Great Britain
-   Scotland
-   England
-   Wales
-  Northern Ireland
+  Scotland
+   Outer Hebrides
+    Lewis and Harris
+    South Uist
+    North Uist
+    Benbecula
+    Barra
+    Great Bernera
+   Inner Hebrides
+    Skye
+    Mull
+    Islay
+    Jura
+    Tiree
+    Coll
+    Raasay
+    Colonsay
+    Scalpay
+    Lismore
+    Ulva
+   Shetland Islands
+    Shetland Mainland
+    Yell
+    Unst
+    Fetlar
+    Bressay
+    Muckle Roe
+    Whalsay
+   Orkney Islands
+    Orkney Mainland
+    Hoy
+    Sanday
+    South Ronaldsay
+    Rousay
+    Westray
+    Stronsay
+    Shapinsay
+    Eday
+   Firth of Clyde
+    Arran
+    Bute
+    Great Cumbrae
+   Small Isles
+    Rùm
+    Eigg
+  Wales
+   Anglesey
+    Anglesey
+    Holy Island
+   Bardsey Island
  Ireland
+ Republic of Ireland
+  Achill Island
+  Inishmore
+  Gorumna
  Isle of Man
+  Isle of Man
+  Calf of Man
 
 
 
-//////
+/// ///
+
+
+
+### li.d3.radial-tree
+
+Exactly the same as li.d3.tree, except the level of each node is indicated by the radial distance from the root node.
+
+    \@li.d3.radial-tree
+    ABCU
+     Air Bud
+      Air Bud
+      Golden Receiver
+      World Pup
+      Seventh Inning Fetch
+      Spikes Back
+     Air Buddies
+      Snow Buddies
+      Space Buddies
+      Santa Buddies
+      Spooky Buddies
+      Treasure Buddies
+      Super Buddies
+     Santa Paws
+      The Search for Santa Paws
+      Santa Paws 2: The Santa Pups
+     MVP
+      MVP: Most Valuable Primate
+      MVP 2: Most Vertical Primate
+      MXP: Most Xtreme Primate
+
+@li.d3.radial-tree
+ABCU
+ Air Bud
+  Air Bud
+  Golden Receiver
+  World Pup
+  Seventh Inning Fetch
+  Spikes Back
+ Air Buddies
+  Snow Buddies
+  Space Buddies
+  Santa Buddies
+  Spooky Buddies
+  Treasure Buddies
+  Super Buddies
+ Santa Paws
+  The Search for Santa Paws
+  Santa Paws 2: The Santa Pups
+ MVP
+  MVP: Most Valuable Primate
+  MVP 2: Most Vertical Primate
+  MXP: Most Xtreme Primate
+
+
+
+/// ///
 
 
 
 ### li.d3.sankey
 
-Creates a sankey diagram from @li.tooltip(CSV:comma separated values) or @li.tooltip(TSV:tab separated values) formatted text, where each row represents a link between two nodes of the sankey. The _source_ and _target_ should be the names of two different items that are linked by a line of thickness proportional to the _value_.
+Creates a sankey diagram from @li.tooltip(CSV:comma separated values) or @li.tooltip(TSV:tab separated values) formatted text, where each row represents a link between two nodes of the sankey. The _source_ and _target_ should be the names of two different items that are linked by a line of thickness proportional to the _value_. Each link can be given a colour with an optional fourth colour (or color) column.
 
     \@li.d3.sankey
-    source, target, value
-    big company, tech start up, 1
-    angel investor, tech start up, 1.5
+    source, target, value, colour
+    big company, tech start up, 1, blue
+    angel investor, tech start up, 1.5, blue
     angel investor, consulting firm, .5
-    medium company, tech start up, 0.3
+    medium company, tech start up, 0.3, blue
     medium company, ad agency, 0.3
     medium company, consulting firm, 2
-    small company, tech start up, 0.5
+    small company, tech start up, 0.5, blue
     small company, supplier, 1
     big company, ad agency, 0.6
     big company, supplier, 4
@@ -560,14 +701,14 @@ Creates a sankey diagram from @li.tooltip(CSV:comma separated values) or @li.too
 §
 
 @li.d3.sankey
-source, target, value
-big company, tech start up, 1
-angel investor, tech start up, 1.5
+source, target, value, colour
+big company, tech start up, 1, blue
+angel investor, tech start up, 1.5, blue
 angel investor, consulting firm, .5
-medium company, tech start up, 0.3
+medium company, tech start up, 0.3, blue
 medium company, ad agency, 0.3
 medium company, consulting firm, 2
-small company, tech start up, 0.5
+small company, tech start up, 0.5, blue
 small company, supplier, 1
 big company, ad agency, 0.6
 big company, supplier, 4
@@ -613,3 +754,7 @@ G,I,0.25
 F,I,0.5
 E,H,1.75
 E,I,1
+
+
+
+/// ///
