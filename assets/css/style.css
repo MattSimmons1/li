@@ -96,16 +96,17 @@ tr, td {
   grid-column: 1 / span 3;
   grid-row: 6;
   background: #282a2e;
-  padding: 5px 15vw 5px 15vw;
+  padding: 5px 5vw 5px 5vw;
   
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr; 
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-template-rows: 1fr; 
 }
 .nav a {
   display: table-cell;
   vertical-align: bottom;
   grid-row: 1;
+  text-align: center;
 }
 
 .guide {
