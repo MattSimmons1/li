@@ -12,17 +12,8 @@ Alternatively, download li.js, save it in the same folder as your document and i
 
 	<script src="li.js"></script>
 
-Then **save the file as .html** and open in Google Chrome or Safari.
+Then **save the file as .html** and open in any modern web browser.
 
-Use [Markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) to add formatting to the text.
+Use [Markdown](https://li.js.org/Examples/cheat%20sheet.html#markdown) to add formatting to the text. Add interactive d3 charts with [li.d3 functions](https://li.js.org/Examples/cheat%20sheet.html#lijs--d3-functions)
 
-### More formatting options
-
-On top of standard Markdown formatting, there are some extra li.js options:
-
-Syntax | Result
---- | ---
-**///** | creates a small gap equal to one tenth of the page height
-**//////** | creates a large gap equal to half the page height (useful for creating gaps between slides in presentations)
-
-More coming soon!
+See the official [website](https://li.js.org) for more.
