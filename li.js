@@ -4,7 +4,7 @@
 
 
 var css = `
-@import url('https://fonts.googleapis.com/css?family=Source+Code+Pro:400,600');
+@import url('https://fonts.googleapis.com/css?family=Source+Code+Pro:200,400,600');
 
   body {
     font-family: 'Source Code Pro', monospace;
@@ -279,7 +279,7 @@ function convert(md) {
     md = md.replace(/(?<!\\)@li\.[Yy]ou[Tt]ube\(([^,]*)(?: *, *(\d+|full|fullscreen))?\)/g, youTubeEmbed);
 
     // li.d3.force-bubble
-    md = md.replace(/(?<!\\)@li\.(?:d3\.)?force-bubble *\n((.*\n)*?)( *\n)/g, toForceBubble);
+    md = md.replace(/(?<!\\)@li\.(?:d3\.)?(force-bubble|bubble|beeswarm|bee-swarm) *\n((.*\n)*?)( *\n)/g, toForceBubble);
 
     // li.d3.bar-chart
     md = md.replace(/(?<!\\)@li\.(?:d3\.)?bar-chart *\n((.*\n)*?)( *\n)/g, toBarChart);
@@ -531,11 +531,17 @@ document.addEventListener('click', function(e) {
 }, false);
 
 
-//TODO: function to convert a section to markdown inside a textarea
-//function convertSectionToEditBox(e) {
-//    console.log(e.target.children[0].md)
-//}
+// colour palette
+function liColour(input) {
 
+    inputColours = ["red", "yellow"] // TODO: fill this in
+    outputColours = ["#???", "#ff8"]
+
+    let index = inputColours.indexOf(input)
+
+    if (index > -1) return outputColours[index];
+    return input
+}
 
 //
 // EXTENSIONS
@@ -972,7 +978,7 @@ function drawBarChart(barChartData, i) {
 
     const headers = barChartData.data.shift()
 
-    const ci = headers.indexOf("colour") > -1 ? headers.indexOf("colour") : headers.indexOf("color");
+    const ci = headers.map(d => Boolean(d.toString().match(/([Cc]olou?r)/g))).indexOf(true)
     const colours = []
 
     if (ci > -1) {
@@ -1018,7 +1024,6 @@ function drawBarChart(barChartData, i) {
       .on("click", changeMeasure)
 
     function changeMeasure() {
-
         measure = ++measure > measures ? 1 : measure;
 
         bars
@@ -1052,31 +1057,57 @@ function drawBarChart(barChartData, i) {
 
 }
 
-function toForceBubble(match, body, none, blankLine) {
+function toForceBubble(match, variant, body, none, blankLine) {
 
     if (typeof(d3) === "undefined") return d3Error;
 
     var data = parseD3CSV(match, body, none, blankLine);
+
+    variant == "bee-swarm" ? "beeswarm" : variant;
 
     //store data globally to be used after parsing has finished
     if(!d3.li) {
         d3.li = {}
     }
     if(!d3.li.forceBubblesData) {
-        d3.li.forceBubblesData = [{data}];
+        d3.li.forceBubblesData = [{data, variant}];
     }
     else {
-        d3.li.forceBubblesData.push({data});
+        d3.li.forceBubblesData.push({data, variant});
     }
 
     let index = d3.li.forceBubblesData.length - 1;
 
-    return `<svg id='force-bubbles-${index}'></svg>`;
+    return `<svg id='li-${variant}-${index}'></svg>`;
 }
 function drawForceBubbles(bubblesData, i) {
 
     //don't render if it's already been rendered
     if(bubblesData.rendered) return;
+
+    const headers = bubblesData.data.shift()
+
+    const ci = headers.map(d => Boolean(d.toString().match(/([Cc]olou?r)/g))).indexOf(true)
+    const colours = []
+
+    if (ci > -1) {
+        bubblesData.data.forEach(function(d){
+            colours.push(d.splice(ci, 1)[0])
+        })
+        headers.splice(ci, 1)
+    }
+
+    const measures = bubblesData.data[0].length - 2;
+    var measure = 0;
+
+
+//    console.log(bubblesData.variant)
+//    console.log(measures)
+//    console.log(measure)
+//
+//    console.log(bubblesData.data)
+//    console.log(colours)
+
 
     const w = window.innerWidth*.8;
     const h = window.innerHeight*.8;
@@ -1087,66 +1118,135 @@ function drawForceBubbles(bubblesData, i) {
       .domain([0, Math.sqrt(d3.sum(bubblesData.data, d => d[1]))])
       .range([0, 0.3*window.innerHeight]);
 
-    //TODO: show scale if d[2]
-    const colourScale = d3.scaleLinear()
-      .domain([0, d3.max(bubblesData.data, d => d[2])])
-      .interpolate(d3.interpolateHcl)
-      .range(["#f00", "#00f"]);
-
-    const svg = d3.select("body").select("svg#force-bubbles-" + i)
+    const svg = d3.select("body").select(`svg#li-${bubblesData.variant}-` + i)
       .style("height", h)
       .style("width", w);
 
     var simulation = d3.forceSimulation()
-      .force("center", d3.forceCenter(w/2, h/2))
       .force("collide", d3.forceCollide().radius(function(d){ return scale(Math.sqrt(d[1])) }).iterations(4))
-      .force('charge', d3.forceManyBody().strength(5))
+      .force("charge", d3.forceManyBody().strength(5))
       .force("forceX", d3.forceX().strength(0.1).x(w/2))
       .force("forceY", d3.forceY().strength(0.1).y(h/2));
 
-    var node = svg.append("g")
-      .attr("class", "nodes")
-      .selectAll("circle")
-      .data(bubblesData.data)
-      .enter().append("circle")
-        .attr("r", function(d){ return scale(Math.sqrt(d[1])); })
-        .style("fill", function(d){ return d[2] ? colourScale(d[2]) : "#282a2e"; })
-        .style("stroke", "#fff")
-        .style("stroke-width", 1)
-        .call(d3.drag()
-          .on("start", dragstarted)
-          .on("drag", dragged)
-          .on("end", dragended));
+    var xScale;
+    if (bubblesData.variant == "beeswarm") {
+        xScale = d3.scaleLinear()
+          .domain([Math.min(d3.min(bubblesData.data, d => d[2]), 0), d3.max(bubblesData.data, d => d[2])])
+          .range([0.1*w, .9*w]);
 
-//    node
-//      .append("text")
-//      .text(function(d) { return "AAAAAA" + (d[0] || ""); }); // TODO: labels?
+        scale.range([0, 0.07*window.innerWidth]);
+
+        simulation
+          .force("forceX", d3.forceX().strength(2).x(d => xScale(d[2])))
+          .force("forceY", d3.forceY().strength(0.5).y(h/2));
+
+        var xAxis = svg.append("g")
+          .attr("transform", "translate(0,"+ h*0.7 +")")
+          .attr("class", "axis")
+          .style("stroke-width", 1)
+          .style("stroke", "#282a2e")
+          .call(d3.axisBottom()
+            .scale(xScale));
+    }
+    else {
+        simulation
+          .force("center", d3.forceCenter(w/2, h/2))
+    }
+
+    const charScale = 10;
+
+    function showLabel(d, index) {
+        return ""
+//        return d[0].length*charScale > scale(d[1]) || d[1].toString().length*charScale > scale(d[1]) ? "" : d[index];
+    }
+
+    svg.on("click", changeMeasure)
+
+    var g = svg.append("g")
+      .attr("class", "nodes")
+      .selectAll("g")
+      .data(bubblesData.data)
+      .enter().append("g")
+
+    var node = g.append("circle")
+      .attr("r", function(d){ return scale(Math.sqrt(d[1])); })
+      .attr("title", d => d[0])
+      .style("fill", (d, i) => colours[i] ? colours[i] : "#282a2e")
+      .style("stroke", "#fff")
+      .style("stroke-width", 0.5)
+      .on("mouseover", function(e){ let d = d3.select(this).datum(); d3.select(this.parentNode).raise().select("text").text(d[0]); d3.select(this.parentNode).select("text.value").text(d[1]).style("z-index", 999)  })
+      .on("mouseleave", function(e){ let d = d3.select(this).datum(); d3.select(this.parentNode).select("text").text(showLabel(d, 0)); d3.select(this.parentNode).select("text.value").text(showLabel(d, 1)) })
+      .call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended));
+
+    var labels = g.append("text")
+      .style("fill", "#fff")
+      .style("stroke", (d, i) => colours[i] ? colours[i] : "#282a2e")
+      .style("stroke-width", 1.5)
+      .style("paint-order", "stroke")
+      .style("text-anchor", "middle")
+      .style("pointer-events", "none")
+      .style("font-weight", "200")
+      .text(d => showLabel(d, 0))
+
+    var values = labels.clone()
+      .attr("class", "value")
+      .style("font-weight", "400")
+      .text(d => showLabel(d, 1));
+
+    const header = svg
+      .append("text")
+      .attr("transform", `translate(${w/2},${h*0.78})`)
+      .style("text-anchor", "middle")
+      .text(headers[measure + 2])
+
+    function changeMeasure() {
+
+        if (bubblesData.variant == "beeswarm") {
+            measure = ++measure >= measures ? 0 : measure;
+
+            simulation
+              .force("forceX", d3.forceX().strength(2).x(d => xScale(d[measure + 2]))).alphaTarget(0.03).restart();
+
+            header.text(headers[measure + 2]);
+        }
+    }
 
     simulation
       .nodes(bubblesData.data)
       .on("tick", ticked);
 
     function ticked() {
-      node
-        .attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; });
+        node
+          .attr("cx", d => d.x)
+          .attr("cy", d => d.y);
+
+        labels
+          .attr("x", d => d.x)
+          .attr("y", d => d.y - 2);
+
+        values
+          .attr("x", d => d.x)
+          .attr("y", d => d.y + 11);
     }
 
     function dragstarted(d) {
-      if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-      d.fx = d.x;
-      d.fy = d.y;
+        if (!d3.event.active) simulation.alphaTarget(0.1).restart();
+        d.fx = d.x;
+        d.fy = d.y;
     }
 
     function dragged(d) {
-      d.fx = d3.event.x;
-      d.fy = d3.event.y;
+        d.fx = d3.event.x;
+        d.fy = d3.event.y;
     }
 
     function dragended(d) {
-      if (!d3.event.active) simulation.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
+        if (!d3.event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
     }
 
     bubblesData.rendered = true;
