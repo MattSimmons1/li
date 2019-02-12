@@ -14,6 +14,6 @@ Alternatively, download li.js, save it in the same folder as your document and i
 
 Then **save the file as .html** and open in any modern web browser.
 
-Use [Markdown](https://li.js.org/Examples/cheat%20sheet.html#markdown) to add formatting to the text. Add interactive d3 charts with [li.d3 functions](https://li.js.org/Examples/cheat%20sheet.html#lijs--d3-functions)
+Use [Markdown](https://li.js.org/Examples/cheat%20sheet.html#markdown) to add formatting to the text. Add interactive d3 charts with [li.d3 functions](https://li.js.org/Examples/cheat%20sheet.html#lijs--d3-functions).
 
 See the official [website](https://li.js.org) for more.

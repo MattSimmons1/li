@@ -150,6 +150,17 @@ To Do
 
 
 
+### Images
+
+    ![image alt text](http://placehold.it/200x200)
+
+![image alt text](http://placehold.it/200x200)
+
+
+
+/// ///
+
+
 ### Inline Code
 
     Write `inline code` with `back-ticks`.
@@ -250,7 +261,19 @@ Make a large spacer (1/2 the page height) with:
 
 Colour inline text with ( #b13f35: hex ) ( #46f: codes ) or ( rgb(113, 187, 32): rgb ).
 
+You can also use certain named colours. These use colours from a pre-defined li.js colour palette rather than the default HTML colours:
 
+(red:██ red)
+(orange:██ orange)
+(yellow:██ yellow)
+(green:██ green) § § §(green2:██ green2)
+(teal:██ teal)
+(blue:██ blue) § § § (blue2:██ blue2)
+(purple:██ purple)
+(pink:██ pink)
+(gray:██ gray)
+(black:██ black)
+(white:██ white)
 
 /// ///
 
@@ -283,6 +306,41 @@ finish
 
 --> <-- <--> <->
 ==> <== <==> <=>
+
+
+
+/// ///
+
+
+
+### Custom Styles
+
+This isn't actually a feature of li.js, rather li.js simply doesn't interfere with any style rules added by the user. Custom styles can be added to HTML elements directly, or by adding css inside a style tag:
+
+    &lt;style>
+     .blue-box {
+         width: 100px;
+         height: 100px;
+         background: blue;
+     }
+    &lt;/style>
+
+    &lt;div class="blue-box">&lt;/div>
+
+<style>
+ .blue-box {
+     width: 100px;
+     height: 100px;
+     background: blue;
+ }
+</style>
+
+<div class="blue-box"></div>
+
+    &lt;div style="width: 100px; height: 100px; background: red;">&lt;/div>
+
+<div style="width: 100px; height: 100px; background: red;"></div>
+
 
 
 
@@ -429,14 +487,14 @@ li.js can be combined with the JavaScript library [D3.js](https://d3js.org) to m
 
 ### li.d3.bar-chart
 
-Creates a bar chart from @li.tooltip(CSV:comma separated values) or @li.tooltip(TSV:tab separated values) formatted text. The first column must contain the label for each bar. The other columns provide the values given to each bar. If there are multiple columns of values they can be transitioned between by **clicking** on the chart. An optional colour (or color) column can be added to set a colour for each bar.
+Creates a bar chart from @li.tooltip(CSV:comma separated values) or @li.tooltip(TSV:tab separated values) formatted text. The first column must contain the label for each bar. The other columns provide the values given to each bar. If there are multiple columns of values they can be transitioned between by **clicking** on the chart. An optional colour (or color) column can be added to set a colour for each bar. The colour can be set for all bars at once in the column name.
 
     \@li.d3.bar-chart
-    Month, 2018 profits (£M), 2017 profits (£M), colour
+    Month, 2018 profits (£M), 2017 profits (£M), colour:grey
     J, 10, 8
     F, 12, 11
     M, 7,  5
-    A, 2,  1, #f33
+    A, 2,  1, red
     M, 6,  3
     J, 8,  13
     J, 12, 6
@@ -447,11 +505,11 @@ Creates a bar chart from @li.tooltip(CSV:comma separated values) or @li.tooltip(
     D, 42, 24
 
 @li.d3.bar-chart
-Month, 2018 profits (£M), 2017 profits (£M), colour
+Month, 2018 profits (£M), 2017 profits (£M), colour:grey
 J, 10, 8
 F, 12, 11
 M, 7,  5
-A, 2,  1, #f33
+A, 2,  1, red
 M, 6,  3
 J, 8,  13
 J, 12, 6
@@ -460,6 +518,266 @@ S, 18, 13
 O, 10, 14
 N, 24, 18
 D, 42, 24
+
+
+
+/// ///
+
+### li.d3.bubble
+
+Creates a bubble chart that uses a force simulation to position the bubbles. The total area of each bubble is equal to the value provided. The name and value of a bubble is shown when moused over. Bubbles can also be clicked and dragged. An optional colour (or color) column can be added to set a colour for each bubble.
+
+    ##### World Population by Country 2017
+
+    \@li.d3.bubble
+    Country	Population	Continent	colour:blue
+    China	1409517397	Asia
+    India	1339180127	Asia
+    United States	324459463	Americas
+    Indonesia	263991379	Asia
+    Brazil	209288278	Americas
+    Pakistan	197015955	Asia
+    Nigeria	190886311	Africa
+    Bangladesh	164669751	Asia
+    ...
+
+##### World Population by Country 2017
+
+@li.d3.bubble
+Country	Population	Continent	colour:blue
+China	1409517397	Asia
+India	1339180127	Asia
+United States	324459463	Americas
+Indonesia	263991379	Asia
+Brazil	209288278	Americas
+Pakistan	197015955	Asia
+Nigeria	190886311	Africa
+Bangladesh	164669751	Asia
+Russia	143989754	Europe
+Mexico	129163276	Americas
+Japan	127484450	Asia
+Ethiopia	104957438	Africa
+Philippines	104918090	Asia
+Egypt	97553151	Africa
+Vietnam	95540800	Asia
+Germany	82114224	Europe
+Democratic Republic of the Congo	81339988	Africa
+Iran	81162788	Asia
+Turkey	80745020	Asia
+Thailand	69037513	Asia
+United Kingdom	66181585	Europe
+France	64979548	Europe
+Italy	59359900	Europe
+Tanzania	57310019	Africa
+South Africa	56717156	Africa
+Myanmar	53370609	Asia
+South Korea	50982212	Asia
+Colombia	49065615	Americas
+Kenya	49699862	Africa
+Spain	46354321	Europe
+Argentina	44271041	Americas
+Ukraine	44222947	Europe
+Uganda	42862958	Africa
+Algeria	41318142	Africa
+Sudan	40533330	Africa
+Iraq	38274618	Asia
+Poland	38170712	Europe
+Canada	36624199	Americas
+Morocco	35739580	Africa
+Afghanistan	35530081	Asia
+Saudi Arabia	32938213	Asia
+Peru	32165485	Americas
+Venezuela	31977065	Americas
+Uzbekistan	31910641	Asia
+Malaysia	31624264	Asia
+Angola	29784193	Africa
+Mozambique	29668834	Africa
+Nepal	29304998	Asia
+Ghana	28833629	Africa
+Yemen	28250420	Asia
+Madagascar	25570895	Africa
+North Korea	25490965	Asia
+Australia	24450561	Oceania
+Ivory Coast	24294750	Africa
+Cameroon	24053727	Africa
+Taiwan	23626456	Asia
+Niger	21477348	Africa
+Sri Lanka	20876917	Asia
+Romania	19679306	Europe
+Burkina Faso	19193382	Africa
+Malawi	18622104	Africa
+Mali	18541980	Africa
+Syria	18269868	Asia
+Kazakhstan	18204499	Asia
+Chile	18054726	Americas
+Zambia	17094130	Africa
+Netherlands	17035938	Europe
+Guatemala	16913503	Americas
+Ecuador	16624858	Americas
+Zimbabwe	16529904	Africa
+Cambodia	16005373	Asia
+Senegal	15850567	Africa
+Chad	14899994	Africa
+Somalia	14742523	Africa
+Guinea	12717176	Africa
+South Sudan	12575714	Africa
+Rwanda	12208407	Africa
+Tunisia	11532127	Africa
+Cuba	11484636	Americas
+Belgium	11429336	Europe
+Benin	11175692	Africa
+Greece	11159773	Europe
+Bolivia	11051600	Americas
+Haiti	10981229	Americas
+Burundi	10864245	Africa
+Dominican Republic	10766998	Americas
+Czech Republic	10618303	Europe
+Portugal	10329506	Europe
+Sweden	9910701	Europe
+Azerbaijan	9827589	Asia
+Hungary	9721559	Europe
+Jordan	9702353	Asia
+Belarus	9468338	Europe
+United Arab Emirates	9400145	Asia
+Honduras	9265067	Americas
+Tajikistan	8921343	Asia
+Serbia	8790574	Europe
+Austria	8735453	Europe
+Switzerland	8476005	Europe
+Israel	8321570	Asia
+Papua New Guinea	8251162	Oceania
+Togo	7797694	Africa
+Sierra Leone	7557212	Africa
+Hong Kong	7364883	Asia
+Bulgaria	7084571	Europe
+Laos	6858160	Asia
+Paraguay	6811297	Americas
+El Salvador	6377853	Americas
+Libya	6374616	Africa
+Nicaragua	6217581	Americas
+Lebanon	6082357	Asia
+Kyrgyzstan	6045117	Asia
+Turkmenistan	5758075	Asia
+Denmark	5733551	Europe
+Singapore	5708844	Asia
+Finland	5523231	Europe
+Slovakia	5447662	Europe
+Norway	5305383	Europe
+Congo	5260750	Africa
+Eritrea	5068831	Africa
+Palestine	4920724	Asia
+Costa Rica	4905769	Americas
+Ireland	4761657	Europe
+Liberia	4731906	Africa
+New Zealand	4705818	Oceania
+Central African Republic	4659080	Africa
+Oman	4636262	Asia
+Mauritania	4420184	Africa
+Croatia	4189353	Europe
+Kuwait	4136528	Asia
+Panama	4098587	Americas
+Moldova	4051212	Europe
+Georgia	3912061	Asia
+Puerto Rico	3663131	Americas
+Bosnia and Herzegovina	3507017	Europe
+Uruguay	3456750	Americas
+Mongolia	3075647	Asia
+Armenia	2930450	Asia
+Albania	2930187	Europe
+Jamaica	2890299	Americas
+Lithuania	2890297	Europe
+Qatar	2639211	Asia
+Namibia	2533794	Africa
+Botswana	2291661	Africa
+Lesotho	2233339	Africa
+The Gambia	2100568	Africa
+Republic of Macedonia	2083160	Europe
+Slovenia	2079976	Europe
+Gabon	2025137	Africa
+Latvia	1949670	Europe
+Guinea-Bissau	1861283	Africa
+Bahrain	1492584	Asia
+Trinidad and Tobago	1369125	Americas
+Eswatini (Swaziland)	1367254	Africa
+Estonia	1309632	Europe
+East Timor	1296311	Asia
+Equatorial Guinea	1267689	Africa
+Mauritius	1265138	Africa
+Cyprus	1179551	Asia
+Djibouti	956985	Africa
+Fiji	905502	Oceania
+Réunion	876562	Africa
+Comoros	813912	Africa
+Bhutan	807610	Asia
+Guyana	777859	Americas
+Montenegro	628960	Europe
+Macau	622567	Asia
+Solomon Islands	611343	Oceania
+Luxembourg	583455	Europe
+Suriname	563402	Americas
+Western Sahara	552628	Africa
+Cape Verde	546388	Africa
+Guadeloupe	449568	Americas
+Maldives	436330	Asia
+Malta	430835	Europe
+Brunei	428697	Asia
+Bahamas	395361	Americas
+Martinique	384896	Americas
+Belize	374681	Americas
+Iceland	335025	Europe
+Barbados	285719	Americas
+French Polynesia	283007	Oceania
+French Guiana	282731	Americas
+New Caledonia	276255	Oceania
+Vanuatu	276244	Oceania
+Mayotte	253045	Africa
+Sao Tome and Principe	204327	Africa
+Samoa	196440	Oceania
+Saint Lucia	178844	Americas
+Guernsey and  Jersey	165314	Europe
+Guam	164229	Oceania
+Curaçao	160539	Americas
+Kiribati	116398	Oceania
+Saint Vincent and the Grenadines	109897	Americas
+Tonga	108020	Oceania
+Grenada	107825	Americas
+Federated States of Micronesia	105544	Oceania
+Aruba	105264	Americas
+United States Virgin Islands	104901	Americas
+Antigua and Barbuda	102012	Americas
+Seychelles	94737	Africa
+Isle of Man	84287	Europe
+Andorra	76965	Europe
+Dominica	73925	Americas
+Cayman Islands	61559	Americas
+Bermuda	61349	Americas
+Greenland	56480	Americas
+American Samoa	55641	Oceania
+Saint Kitts and Nevis	55345	Americas
+Northern Mariana Islands	55144	Oceania
+Marshall Islands	53127	Oceania
+Faroe Islands	49290	Europe
+Sint Maarten	40120	Americas
+Monaco	38695	Europe
+Liechtenstein	37922	Europe
+Turks and Caicos Islands	35446	Americas
+Gibraltar	34571	Europe
+San Marino	33400	Europe
+British Virgin Islands	31196	Americas
+Caribbean Netherlands	25398	Americas
+Palau	21729	Oceania
+Cook Islands	17380	Oceania
+Anguilla	14909	Americas
+Wallis and Futuna	11773	Oceania
+Nauru	11359	Oceania
+Tuvalu	11192	Oceania
+Saint Pierre and Miquelon	6320	Americas
+Montserrat	5177	Americas
+Saint Helena, Ascension and Tristan da Cunha	4049	Africa
+Falkland Islands	2910	Americas
+Niue	1618	Oceania
+Tokelau	1300	Oceania
+Vatican City	792	Europe
 
 
 
@@ -531,93 +849,49 @@ Life
 ### li.d3.cluster
 
     \@li.d3.cluster
-    The British Isles
-     United Kingdom
-      England
-       Isle of Wight
-       Isle of Sheppey
-       Hayling Island
+    Elementary Particles
+     Fermions
+      Quarks
+       Up
+       Anti Up
+       Down
+       Anti Down
        ...
 
 @li.d3.cluster
-The British Isles
- United Kingdom
-  England
-   Isle of Wight
-   Isle of Sheppey
-   Hayling Island
-   Foulness Island
-   Portsea Island
-   Canvey Island
-   Mersea Island
-   Walney Island
-   Lundy
-   Thorney Island
-   Isles of Scilly
-    St Mary's
-    Tresco
-    St Martin's
-    St Agnes
-    Bryher
-  Great Britain
-  Scotland
-   Outer Hebrides
-    Lewis and Harris
-    South Uist
-    North Uist
-    Benbecula
-    Barra
-    Great Bernera
-   Inner Hebrides
-    Skye
-    Mull
-    Islay
-    Jura
-    Tiree
-    Coll
-    Raasay
-    Colonsay
-    Scalpay
-    Lismore
-    Ulva
-   Shetland Islands
-    Shetland Mainland
-    Yell
-    Unst
-    Fetlar
-    Bressay
-    Muckle Roe
-    Whalsay
-   Orkney Islands
-    Orkney Mainland
-    Hoy
-    Sanday
-    South Ronaldsay
-    Rousay
-    Westray
-    Stronsay
-    Shapinsay
-    Eday
-   Firth of Clyde
-    Arran
-    Bute
-    Great Cumbrae
-   Small Isles
-    Rùm
-    Eigg
-  Wales
-   Anglesey
-    Anglesey
-    Holy Island
-   Bardsey Island
- Ireland
- Republic of Ireland
-  Achill Island
-  Inishmore
-  Gorumna
- Isle of Man
-  Isle of Man
-  Calf of Man
+Elementary Particles
+ Fermions
+  Quarks
+   Up
+   Anti Up
+   Down
+   Anti Down
+   Charm
+   Anti Charm
+   Strange
+   Anti Strange
+   Top
+   Anti Top
+   Bottom
+   Anti Bottom
+  Leptons
+   Electron
+   Muon
+   Tau
+   Neutrinos
+    Electron Neutrino
+    Muon Neutrino
+    Tau Neutrino
+ Bosons
+  Gauge
+   Photon
+   Weak Bosons
+    W+
+    W-
+    Z
+   Gluons
+  Scalar
+   Higgs
 
 
 
@@ -651,6 +925,8 @@ Exactly the same as li.d3.tree, except the level of each node is indicated by th
       MVP: Most Valuable Primate
       MVP 2: Most Vertical Primate
       MXP: Most Xtreme Primate
+
+§
 
 @li.d3.radial-tree
 ABCU
@@ -720,40 +996,41 @@ The same node can be the source and target of multiple paths.
 
     \@li.d3.sankey
     source, target, value
-    A,B,1
-    A,C,1
-    A,D,2
-    D,E,2
-    C,E,0.75
-    C,F,0.25
-    B,F,0.5
-    B,G,0.5
-    G,H,0.25
-    F,H,0.25
-    G,I,0.25
-    F,I,0.5
-    E,H,1.75
-    E,I,1
+    A, B, 1
+    A, C, 1
+    A, D, 2
+    D, E, 2
+    C, E, 0.75
+    C, F, 0.25
+    B, F, 0.5
+    B, G, 0.5
+    G, H, 0.25
+    F, H, 0.25
+    G, I, 0.25
+    F, I, 0.5
+    E, H, 1.75
+    E, I, 1
+
 
 §
 §
 
 @li.d3.sankey
 source, target, value
-A,B,1
-A,C,1
-A,D,2
-D,E,2
-C,E,0.75
-C,F,0.25
-B,F,0.5
-B,G,0.5
-G,H,0.25
-F,H,0.25
-G,I,0.25
-F,I,0.5
-E,H,1.75
-E,I,1
+A, B, 1
+A, C, 1
+A, D, 2
+D, E, 2
+C, E, 0.75
+C, F, 0.25
+B, F, 0.5
+B, G, 0.5
+G, H, 0.25
+F, H, 0.25
+G, I, 0.25
+F, I, 0.5
+E, H, 1.75
+E, I, 1
 
 
 
