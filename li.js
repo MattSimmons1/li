@@ -159,7 +159,7 @@ var css = `
 	height: 0;
 	border-left: 5px solid transparent;
 	border-right: 5px solid transparent;
-	border-top: 20px solid #282a2e;
+	border-top: 10px solid #282a2e;
   }
   .li-bar-chart {
     fill: #282a2e;
@@ -177,7 +177,7 @@ var css = `
     stroke-opacity: .4;
   }
   .li-sankey-link:hover {
-    stroke-opacity: .7;
+    stroke-opacity: .7 !important;
   }
   .tick text {
     font-weight: lighter;
@@ -703,14 +703,12 @@ function renderD3() {
         .append("div")
         .attr("class", "li-d3-tooltip li-d3-tooltip-box")
 
-
     d3.li.tooltip.pointer = d3.select("body")
         .append("div")
         .attr("class", "li-d3-tooltip li-d3-tooltip-pointer")
 
     d3.li.tooltip.show = false;
-
-
+    moveTooltip();
 
     // li.d3.tree & li.d3.cluster
     if(d3.li.treeData) {
@@ -744,13 +742,13 @@ function moveTooltip() {
     d3.li.tooltip
       .transition().duration(30)
         .style("left", (posX - boxWidth/2) + "px")
-        .style("top", (posY - boxHeight - 20 - 1) + "px")
+        .style("top", (posY - boxHeight - 10 - 1) + "px")
         .style("opacity", d3.li.tooltip.show ? 1 : 0)
 
     d3.li.tooltip.pointer
       .transition().duration(30)
         .style("left", (posX - 5) + "px")
-        .style("top", (posY - 20 - 1) + "px")
+        .style("top", (posY - 10 - 1) + "px")
         .style("opacity", d3.li.tooltip.show ? 1 : 0)
 
     document.body.style.pointer = d3.li.tooltip.show ? "none" : "default";
@@ -991,8 +989,8 @@ function drawSankey(data, index) {
         .attr("class", "li-sankey-link")
         .style("stroke", d => liColour(data.data.filter(e => e.source == d.source.name && e.target == d.target.name)[0].colour) || "#686a6e")
         .attr("d", path)
-        .style("stroke-width", function(d) { return Math.max(1, d.dy); })
-        .sort(function(a, b) { return b.dy - a.dy; })
+        .style("stroke-width", function(d){ return Math.max(1, d.dy); })
+        .sort(function(a, b){ return b.dy - a.dy; })
         .on("mouseleave", hideTooltip)
         .on("mouseenter", updateLinkTooltip);
 
@@ -1001,14 +999,24 @@ function drawSankey(data, index) {
         .data(nodes)
       .enter().append("g")
         .attr("class", "li-sankey-node")
-        .attr("transform", function(d) {
+        .attr("transform", function(d){
   		    return "translate(" + d.x + "," + d.y + ")"; })
-      .on("mouseleave", hideTooltip)
-      .on("mouseenter", updateNodeTooltip)
+      .on("mouseenter", function(d){ updateNodeTooltip(d); mouseenterNode(d) })
+      .on("mouseleave", function(d){ hideTooltip(d); mouseleaveNode(d) })
       .call(d3.drag()
-        .on("start", function() {
+        .on("start", function(){
   		    this.parentNode.appendChild(this); })
         .on("drag", dragmove));
+
+    function mouseenterNode(d) {
+        link.filter(e => e.source == d || e.target == d)
+          .style("stroke-opacity", .7)
+    }
+
+    function mouseleaveNode(d) {
+        link.filter(e => e.source == d || e.target == d)
+          .style("stroke-opacity", .4)
+    }
 
     function updateNodeTooltip(d) {
         d3.li.tooltip.show = true;
@@ -1023,7 +1031,7 @@ function drawSankey(data, index) {
     function updateLinkTooltip(d) {
         d3.li.tooltip.show = true;
         d3.li.tooltip.html(
-            `${d.source.name} ⟶ ${d.target.name}</br>
+            `${d.source.name} <span style="font-size: 16px; line-height: 0.4;">⟶</span> ${d.target.name}</br>
             <div style="display: grid; grid-template-columns: max-content 1fr;">
               <p style="display: inline; font-weight: 200; margin: 0;">${measureName}:&nbsp</p>
               <p style="display: inline; text-align: right; margin: 0;">${d.value}</p>
@@ -1095,14 +1103,15 @@ function drawBarChart(barChartData, i) {
     const headers = barChartData.data.shift()
 
     const ci = headers.map(d => Boolean(d.toString().match(/([Cc]olou?r)([:\=]\w)?/g))).indexOf(true)
-    var defaultColour = headers[ci].replace("=", ":").split(":")[1];
-    defaultColour = typeof(defaultColour) == "undefined" ? "#282a2e" : defaultColour;
 
-    var colours = []
+    var colours = [];
+    var defaultColour;
 
     if (ci > -1) {
-        headers.splice(ci, 1)
-        barChartData.data.forEach(d => colours.push(d.splice(ci, 1)[0]))
+        defaultColour = headers[ci].replace("=", ":").split(":")[1];
+        defaultColour = typeof(defaultColour) == "undefined" ? "#282a2e" : defaultColour;
+        headers.splice(ci, 1);
+        barChartData.data.forEach(d => colours.push(d.splice(ci, 1)[0]));
     }
 
     colours = colours.map(d => d ? d : defaultColour)
@@ -1255,12 +1264,13 @@ function drawForceBubbles(bubblesData, i) {
     const headers = bubblesData.data.shift()
 
     const ci = headers.map(d => Boolean(d.toString().match(/([Cc]olou?r)/g))).indexOf(true)
-    var defaultColour = headers[ci].replace("=", ":").split(":")[1];
-    defaultColour = typeof(defaultColour) == "undefined" ? "#282a2e" : defaultColour;
 
-    var colours = []
+    var colours = [];
+    var defaultColour;
 
     if (ci > -1) {
+        defaultColour = headers[ci].replace("=", ":").split(":")[1];
+        defaultColour = typeof(defaultColour) == "undefined" ? "#282a2e" : defaultColour;
         bubblesData.data.forEach(d => colours.push(d.splice(ci, 1)[0]));
         headers.splice(ci, 1);
     }
@@ -1374,7 +1384,7 @@ function drawForceBubbles(bubblesData, i) {
             header.text(headers[measure + 2]);
 
             d3.li.tooltip.show = false;
-            moveTooltip()
+            moveTooltip();
         }
     }
 
@@ -1392,6 +1402,8 @@ function drawForceBubbles(bubblesData, i) {
         if (!d3.event.active) simulation.alphaTarget(0.1).restart();
         d.fx = d.x;
         d.fy = d.y;
+        d3.li.tooltip.show = false;
+        moveTooltip();
     }
 
     function dragged(d) {
