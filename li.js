@@ -115,6 +115,26 @@ var css = `
     padding 0;
     margin 0;
   }
+  .li-nav-bar {
+    position: absolute;
+    background: #282a2e;
+    top: 0;
+    left: 0;
+    width: calc(90vw + 18px);
+    height: 24px;
+    margin: 0;
+    padding: 6px 0 6px calc(10vw - 18px);
+    z-index: -100;
+  }
+  .li-nav-bar a {
+    color: white;
+    font-size: 12px;
+    text-decoration: none;
+    margin: 18px;
+  }
+  .li-nav-bar a:hover {
+      text-decoration: underline;
+  }
 
   .li-watermark {
     position: absolute;
@@ -122,6 +142,7 @@ var css = `
     right: 0;
     margin: 6px;
     opacity: 0.2;
+    z-index: 1;
   }
   .li-watermark:hover {
     opacity: 1;
@@ -247,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
     document.body.innerHTML = html;
 
-    save()
+    save();
 
     //add edit icon
     document.body.appendChild(editIcon)
@@ -290,7 +311,7 @@ function convert(md) {
     md = md.replace(/(?<!\\)@li\.font\( *([\w ]*) *(?:, *(.*) *)?\)/g, changeFont);
 
     // colours
-    md = md.replace(/(?<!\\)\( *((?:rgb\( *[0-9]{1,3} *, *[0-9]{1,3} *, *[0-9]{1,3} *\))|(?:#[0-9a-zA-Z]{3})|(?:#[0-9a-zA-Z]{6})|red|orange|yellow|green|green2|teal|blue|blue2|purple|pink|grey|gray|black|white *):(.*?) *\)/g, function(_, colour, content){ return `<span style='color:${liColour(colour)};'>${content}</span>` })  // TODO: stupid
+    md = md.replace(/(?<!\\)\( *((?:rgb\( *[0-9]{1,3} *, *[0-9]{1,3} *, *[0-9]{1,3} *\))|(?:#[0-9a-zA-Z]{3})|(?:#[0-9a-zA-Z]{6})|red|orange2?|yellow|green2?|teal2?|blue|blue2|purple2?|pink|grey2?|gray2?|brown2?|gold|black|white *):(.*?) *\)/g, function(_, colour, content){ return `<span style='color:${liColour(colour)};'>${content}</span>` })  // TODO: stupid
     md = md.replace(/\\(\( *((?:rgb\( *[0-9]{1,3} *, *[0-9]{1,3} *, *[0-9]{1,3} *\))|(?:#[0-9a-zA-Z]{3})|(?:#[0-9a-zA-Z]{6}) *):)/g, "$1")
 
     //colour tags - rgb version (may have been converted to HTML tags by the browser) - DEPRECIATED
@@ -320,6 +341,16 @@ function convert(md) {
 
     // li.big
     md = md.replace(/ *(?<!\\)@li\.big(.*)?\n?/g, toBigText);
+
+    // li.nav //TODO: make watermarks white if nav bar
+    md = md.replace(/ *(?<!\\)@li\.nav(?:-?bar)?\(((?:[\n ]*\[.*\]\(.*\),?[\n ]*)+)\)/g, function(_, content){
+        var nav = "<div class='li-nav-bar'>"
+        content.replace(" ", "").replace("\n", "").split(",").forEach(function(d){
+            nav += d.replace(/\[(.*)\]\((.*)\)/g, (_, name, href) => `<a href="${href}">${name}</a>`)
+
+        })
+        return nav + "</div>"
+    })
 
     showdown.setFlavor('github');
     showdown.setOption('simpleLineBreaks', true);
@@ -562,20 +593,69 @@ document.addEventListener('click', function(e) {
 const palette = {
     red: "rgb(223,82,92)", //"#d63031",
     orange: "rgb(240,142,57)", //"#e17055",
+    orange2: "rgb(253,189,130)", //"#e17055",
     yellow: "rgb(240,205,107)", //"#ffeaa7",
     green: "rgb(91,160,83)", //"#00b894",
     green2: "rgb(142,208,129)",
     teal: "rgb(76,152,148)",
+    teal2: "rgb(136,188,182)",
     blue: "rgb(80,122,165)", //"#0984e3",
     blue2: "rgb(161,203,231)",
     purple: "rgb(175,123,160)", //"#6c5ce7",
+    purple2: "rgb(211,167,199)",
     pink: "rgb(253,157,156)", //"#fd79a8",
     grey: "rgb(121,112,110)", //"#636e72",
     gray: "rgb(121,112,110)", //"#636e72",
+    grey2: "rgb(186,176,172)",
+    gray2: "rgb(186,176,172)",
+    brown: "rgb(156,118,98)",
+    brown2: "rgb(214,181,167)",
+    gold: "rgb(181,152,118)",
     black: "#282a2e"
 }
+const patterns = {}
+
 // colour palette
-function liColour(input) {
+function liColour(input, svg) {
+
+    if (typeof(input) == "undefined") return input;
+
+    if (input.match("-stripe") && typeof(svg) != "undefined") {
+
+        var colourName = input.split("-")[0]
+
+        if (palette.hasOwnProperty(colourName)) {
+            colourName = palette[colourName]
+        }
+
+        if (!svg[input]) {
+
+            if (!svg.defs) {
+                svg.defs = svg.append("defs")
+            }
+
+            svg[input] = svg.defs
+              .append("pattern")
+               .attr("id", input)
+               .attr("width", 3)
+               .attr("height", 3)
+               .attr("patternUnits", "userSpaceOnUse")
+               .attr("patternTransform", "rotate(45 50 50)")
+
+            svg[input]
+              .append("line")
+              .attr("y1", 0)
+              .attr("y2", 0)
+              .attr("x1", 0)
+              .attr("x2", 3)
+              .attr("stroke", colourName)
+              .attr("stroke-width", 3)
+
+        }
+        return "url(#" + input + ")"
+    }
+
+    // colours
     if (palette.hasOwnProperty(input)) {
         return palette[input];
     }
@@ -771,9 +851,42 @@ function parseD3CSV(match, body, none, blankLine) {
     body = body.replace(/(?<!\\)\t/g, "__DELIM__");
     body = body.replace(/\\\t/g, "\t");
 
-    var data = body.split("\n").map(d => d.split("__DELIM__").map(d => typeof(d) === "string" ? d.trim() : d ).map(d => /^\d+$/.test(d) ? parseFloat(d) : d));
+    var data = body.split("\n").map(d => d.split("__DELIM__").map(d => typeof(d) === "string" ? d.trim() : d ).map(d => /^[-\d\.]+$/.test(d) ? parseFloat(d) : d));
 
     return data;
+}
+
+function getTypes(data) {
+    // logic: if more than half of non null values are that type
+    let types = []
+
+    const len = data[0].length
+    for (let i = 0; i < len; i++) {
+
+        var numbers = 0;
+        var strings = 0;
+
+        data.forEach(function(d){
+
+            if (!(typeof(d[i]) == "undefined")) {
+
+                if (typeof(d[i]) == "number") numbers++;
+                else if(!(d[i].replace(" ", "").length == 0)) {
+                    if (typeof(d[i]) == "string") strings++;
+                }
+            }
+
+        })
+
+        if (strings >= numbers) {
+           types.push("string")
+        }
+        else {
+            types.push("number")
+        }
+    }
+
+    return types
 }
 
 //from https://beta.observablehq.com/@mbostock/tree-o-matic
@@ -893,7 +1006,6 @@ function drawTree(treeData, i) {
     treeData.rendered = true;
 }
 
-// TODO: optional column: category --> categorical scale to colour links
 function toSankey(match, headers, body, none, blankLine) {
     if (typeof(d3) === "undefined") return d3Error;
 
@@ -940,7 +1052,7 @@ return sankey}
 function drawSankey(data, index) {
 
     var width = window.innerWidth*.8;
-    var height = window.innerHeight*.6;
+    var height = window.innerHeight*.7;
 
     data.headers = data.headers.replace(" ", "").split(",");
 
@@ -987,7 +1099,7 @@ function drawSankey(data, index) {
         .data(links)
       .enter().append("path")
         .attr("class", "li-sankey-link")
-        .style("stroke", d => liColour(data.data.filter(e => e.source == d.source.name && e.target == d.target.name)[0].colour) || "#686a6e")
+        .style("stroke", d => liColour(data.data.filter(e => e.source == d.source.name && e.target == d.target.name)[0].colour, svg) || "#686a6e")
         .attr("d", path)
         .style("stroke-width", function(d){ return Math.max(1, d.dy); })
         .sort(function(a, b){ return b.dy - a.dy; })
@@ -1099,9 +1211,11 @@ function drawBarChart(barChartData, i) {
 
     //don't render if it's already been rendered
     if(barChartData.rendered) return;
+    barChartData.rendered = true;
 
     const headers = barChartData.data.shift()
 
+    //extract colours
     const ci = headers.map(d => Boolean(d.toString().match(/([Cc]olou?r)([:\=]\w)?/g))).indexOf(true)
 
     var colours = [];
@@ -1114,29 +1228,79 @@ function drawBarChart(barChartData, i) {
         barChartData.data.forEach(d => colours.push(d.splice(ci, 1)[0]));
     }
 
-    colours = colours.map(d => d ? d : defaultColour)
-    colours = colours.map(liColour)
+    //get types of headers
+    const types = getTypes(barChartData.data);
+    //logic: first column is the group
+    var groups = []
+    //reformat null category names to keep them in
+    barChartData.data.forEach(function(d, i){
+        if(!d[0]) {
+            d[0] = "__empty__" + i;
+        }
+    })
+    barChartData.data.forEach(function(d){ if(groups.indexOf(d[0]) < 0) groups.push(d[0]) })
 
     const measures = headers.length - 1;
     var measure = 1;
+
+    barChartData.stackHeights = [];
+
+    var dataDomain = [0, 0];
+
+    //loop over every row for every group for every measure
+    for (let i = 1; i < measures + 1; i++) {
+
+        if (types[i] == "string") continue;
+
+        barChartData.stackHeights[i] = []
+
+        for (let j = 0; j < groups.length; j++) {
+
+            var running_total = 0
+            var negative_running_total = 0
+
+            barChartData.data.forEach(function(d, k){
+
+                if (d[0] === groups[j]) {
+                    if (d[i] >= 0) {
+                        barChartData.stackHeights[i][k] = running_total;
+
+                        running_total += d[i] ? parseFloat(d[i]) : 0;
+
+                        if (running_total > dataDomain[0]) dataDomain[0] = running_total;
+                    }
+                    if (d[i] < 0) {
+                        barChartData.stackHeights[i][k] = negative_running_total;
+
+                        negative_running_total += d[i] ? parseFloat(d[i]) : 0;
+
+                        if (negative_running_total < dataDomain[1]) dataDomain[1] = negative_running_total;
+                    }
+                }
+            })
+        }
+    }
 
     const w = window.innerWidth*.8;
     const h = window.innerHeight*.8;
     const ym = 20;
     const xm = 40;
-    const barWidth = Math.min((w - xm*4)/barChartData.data.length - 1, 65)  //TODO: keep?
+    const barWidth = Math.min((w - xm*4)/groups.length - 1, 65)
 
     const scale = d3.scaleLinear()
-      .domain([d3.max(barChartData.data, d => d[1]), Math.min(d3.min(barChartData.data, d => d[1]), 0)])
+      .domain(dataDomain)
       .range([xm, 0.9*h]);
 
     const iScale = d3.scaleLinear()
-      .domain([0, barChartData.data.length])
+      .domain([0, groups.length])
       .range([xm*2, w - xm*2]);
 
     const svg = d3.select("body").select("svg#li-bar-chart-" + i)
       .style("height", h)
       .style("width", w);
+
+    colours = colours.map(d => d ? d : defaultColour)
+    colours = colours.map(d => liColour(d, svg))
 
     const bars = svg.selectAll("rect")
       .data(barChartData.data)
@@ -1145,11 +1309,11 @@ function drawBarChart(barChartData, i) {
     bars
       .attr("class", "li-bar-chart")
       .style("fill", (d, i) => colours[i] || "#282a2e")
-      .attr("x", (d, i) => iScale(i))
-      .attr("y", d => scale(0))
+      .attr("x", d => iScale(groups.indexOf(d[0])))
+      .attr("y", (d, i) => scale(0))
       .attr("width", barWidth)
       .attr("height", d => Math.abs(scale(0) - scale(0)))
-      .attr("transform", `translate(${((w - xm*4)/barChartData.data.length - 1 - barWidth)/2}, 0)`)
+      .attr("transform", `translate(${((w - xm*4)/groups.length - 1 - barWidth)/2}, 0)`)
       .on("mouseenter", updateTooltip)
       .on("mouseleave", hideTooltip);
 
@@ -1165,15 +1329,16 @@ function drawBarChart(barChartData, i) {
               .duration(500)
               .delay((d, i) => i*20)
                 .attrTween("height", function(d) {
-                    var i = d3.interpolate(0, d[measure]);
+                    const i = d3.interpolate(0, d[measure]);
                     return function(t) {
                         return Math.abs(scale(0) - scale(i(t)))
                     }
                 })
-                .attrTween("y", function(d) {
-                    var i = d3.interpolate(0, d[measure]);
+                .attrTween("y", function(d, j) {
+                    const i = d3.interpolate(0, d[measure]);
+                    const i2 = d3.interpolate(0, barChartData.stackHeights[measure][j]);
                     return function(t) {
-                        return i(t) < 0 ? scale(0) : scale(i(t))
+                        return i(t) < 0 ? scale(i2(t)) : scale(i(t) + i2(t))
                     }
                 });
 
@@ -1186,20 +1351,25 @@ function drawBarChart(barChartData, i) {
         const previousMeasure = measure
         measure = ++measure > measures ? 1 : measure;
 
+        if (types[measure] == "string") {
+            measure = ++measure > measures ? 1 : measure;
+        }
+
         bars
           .transition()
           .duration(500)
             //make sure the height tweens properly if the sign of the measure flips
             .attrTween("height", function(d) {
-                var i = d3.interpolate(d[previousMeasure], d[measure]);
+                const i = d3.interpolate(d[previousMeasure], d[measure]);
                 return function(t) {
                     return Math.abs(scale(0) - scale(i(t)))
                 }
             })
-            .attrTween("y", function(d) {
-                var i = d3.interpolate(d[previousMeasure], d[measure]);
+            .attrTween("y", function(d, j) {
+                const i = d3.interpolate(d[previousMeasure], d[measure]);
+                const i2 = d3.interpolate(barChartData.stackHeights[previousMeasure][j], barChartData.stackHeights[measure][j]);
                 return function(t) {
-                    return i(t) < 0 ? scale(0) : scale(i(t))
+                    return i(t) < 0 ? scale(i2(t)) : scale(i(t) + i2(t))
                 }
             })
 
@@ -1210,9 +1380,9 @@ function drawBarChart(barChartData, i) {
     }
 
     svg.selectAll("text")
-      .data(barChartData.data)
+      .data(groups)
       .enter().append("text")
-        .text(d => d[0])
+        .text(d => d.includes("__empty__") ? "" : d.replace(/'/g, ""))
         .attr("x", (d, i) => iScale(i) + (iScale(0.5) - iScale(0)))
         .attr("y", h*.9 + ym)
         .style("text-anchor", "middle");
@@ -1275,9 +1445,6 @@ function drawForceBubbles(bubblesData, i) {
         headers.splice(ci, 1);
     }
 
-    colours = colours.map(d => d ? d : defaultColour)
-    colours = colours.map(liColour)
-
     const measures = bubblesData.data[0].length - 2;
     var measure = 0;
 
@@ -1297,6 +1464,9 @@ function drawForceBubbles(bubblesData, i) {
     const svg = d3.select("body").select(`svg#li-${bubblesData.variant}-` + i)
       .style("height", h)
       .style("width", w);
+
+    colours = colours.map(d => d ? d : defaultColour)
+    colours = colours.map(d => liColour(d, svg))
 
     var simulation = d3.forceSimulation()
       .force("collide", d3.forceCollide().radius(d => scale(Math.sqrt(d[1]))).iterations(4))
@@ -1365,11 +1535,8 @@ function drawForceBubbles(bubblesData, i) {
             `${d[0]}</br>
             <div style="display: grid; grid-template-columns: max-content 1fr;">
               <p style="display: inline; font-weight: 200; margin: 0;">${headers[1]}:&nbsp</p>
-              <p style="display: inline; text-align: right; margin: 0;">${d[1]}</p></div>
-            <div style="display: grid; grid-template-columns: max-content 1fr;">
-              <p style="display: inline; font-weight: 200; margin: 0;">${headers[measure + 2]}:&nbsp</p>
-              <p style="display: inline; text-align: right; margin: 0;">${d[measure + 2]}</p>
-            </div>`
+              <p style="display: inline; text-align: right; margin: 0;">${d[1]}</p></div>`
+            + (measures > 1 ? `<div style="display: grid; grid-template-columns: max-content 1fr;"><p style="display: inline; font-weight: 200; margin: 0;">${headers[measure + 2]}:&nbsp</p><p style="display: inline; text-align: right; margin: 0;">${d[measure + 2]}</p></div>` : "")
         );
     }
 
