@@ -15,7 +15,7 @@
   <meta name="description" content="li.js: The auto-formatting javascript library. Create beautiful web pages from plain text files. No code, no installs, no download.">
 
   <title>li.js</title>
-  
+
   <link rel="stylesheet" type="text/css" href="assets/css/style.css">
   <link rel="icon" type="image/png" href="./favicon.png">
 </head>
@@ -31,7 +31,7 @@
     <div class="script-tag" id="tag" onclick="copyTag()">
       <div class="script-tag-inner"><p>&lt;script src=&apos;https://li.js.org/li.js&apos;&gt;&lt;/script&gt;</p></div>
     </div>
-    
+
     <div class="nav">
       <a href="Examples/cheat sheet.html">Cheat Sheet</a>
       <a href="https://github.com/MattSimmons1/li/tree/master/Examples" style="text-align: center">Examples</a>
@@ -40,8 +40,17 @@
     </div>
 
   </div>
-  <div class="guide" id="guide">
-    <h1 class="guide-title">Syntax Guide</h1>
+
+  <div class="guide">
+    <div class="about">
+      <h1 class="guide-title" id="about">About</h1>
+      <h3>Security</h3>
+      <p class="guide-info">li.js <b>does not collect any data</b> of any kind from its users, and never will. We believe that no one would use li.js if that were the case. However, users should make sure never to import li.js from any domain other than li.js.org, as there is no way of being certain that the version being imported is secure.</p>
+      <h3>Licence</h3>
+      <p class="guide-info">li.js is free and open soure. It is released under the <b>BSD 3-Clause "New" or "Revised" License</b>. See the full licence <a href="https://github.com/MattSimmons1/li/blob/master/LICENSE">here</a>.</p>
+    </div>
+
+    <h1 class="guide-title" id="guide">Syntax Guide</h1>
     <p class="guide-info">Use <a href="Examples/cheat sheet.html#markdown">Markdown</a> syntax to add formatting. li.js also adds some new syntax.</p>
     <h3 class="guide-subtitle">li.js Shortcuts</h3>
     <table class="guide-table guide-table-1">
@@ -142,13 +151,13 @@
 
 </body>
 <script>
-  
+
 function copyTag() {
     if (document.selection) { // IE
         var range = document.body.createTextRange();
         range.moveToElementText(document.getElementById("tag"));
         range.select();
-    } 
+    }
     else if (window.getSelection) {
         var range = document.createRange();
         range.selectNode(document.getElementById("tag"));
@@ -156,7 +165,7 @@ function copyTag() {
         window.getSelection().addRange(range);
     }
 
-    document.execCommand("copy");  
+    document.execCommand("copy");
 }
 
 </script>

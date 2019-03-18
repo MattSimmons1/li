@@ -47,7 +47,7 @@ tr, td {
   grid-template-rows: 1fr 150px min-content 45px 1fr min-content;
   grid-template-columns: 15vw 1fr 15vw;
   grid-row-gap: 15px;
-  
+
   height: 100vh;
   width: 100vw;
 }
@@ -59,7 +59,7 @@ tr, td {
   background-repeat: no-repeat;
   height: 100%;
   width: 100%;
-  
+
   grid-column: 2;
   grid-row: 2;
 }
@@ -97,10 +97,10 @@ tr, td {
   grid-row: 6;
   background: #282a2e;
   padding: 5px 5vw 5px 5vw;
-  
+
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-template-rows: 1fr; 
+  grid-template-rows: 1fr;
 }
 .nav a {
   display: table-cell;
@@ -113,55 +113,61 @@ tr, td {
   background: #282a2e;
   display: grid;
   grid-template-columns: 15vw 1fr 15vw;
-  grid-template-rows: 10vh auto auto auto auto auto auto auto auto 10vh;
+  grid-template-rows: 10vh auto auto auto auto auto auto auto auto auto 10vh;
   grid-row-gap: 15px;
-  
-  height: auto; 
+
+  height: auto;
+}
+
+.about {
+  grid-column: 2;
+  grid-row: 2;
+  margin-bottom: 10vh;
 }
 
 .guide-title {
   grid-column: 2;
-  grid-row: 2;
+  grid-row: 3;
 }
 
 .guide-subtitle {
   grid-column: 2;
-  grid-row: 4;
+  grid-row: 5;
 }
 
 .guide-info {
   grid-column: 2;
-  grid-row: 3;
+  grid-row: 4;
   color: #fff;
 }
 
 .guide-table {
   grid-column: 2;
   table-layout: fixed;
-  width: 70vw; 
+  width: 70vw;
   padding: 50px;
 }
 
 .guide-table-1 {
-  grid-row: 5;
+  grid-row: 6;
 }
 
 .guide-subtitle-2 {
   grid-column: 2;
-  grid-row: 6;
+  grid-row: 7;
 }
 
 .guide-table-2 {
-  grid-row: 7;
+  grid-row: 8;
 }
 
 .guide-subtitle-3 {
   grid-column: 2;
-  grid-row: 8;
+  grid-row: 9;
 }
 
 .guide-table-3 {
-  grid-row: 9;
+  grid-row: 10;
 }
 
 .li-tooltip {

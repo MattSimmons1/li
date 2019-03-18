@@ -14,7 +14,7 @@ var css = `
   h1 {
     font-size: 50px;
   }
-  p, li, ol, ul, td, th, textarea {
+  p, li, ol, ul, td, th, textarea, blockquote {
     font-size: 12px;
   }
   pre {
@@ -47,6 +47,38 @@ var css = `
     table-layout: fixed;
     border-collapse: collapse;
   }
+  .li-blockquote {
+    border-left: 3px solid #282a2e;
+    margin: 24px 0 24px 0;
+    padding: 0 48px 0 48px;
+  }
+
+  .li-quote {
+    margin: 60px 0 60px 0;
+  }
+  .li-quote p {
+    position: relative;
+    font-style: italic;
+    font-size: 3em;
+  }
+  .li-quote p:before {
+    content: '\\201C';
+    position: absolute;
+    font-style: normal;
+
+    top: -42px;
+    left: -35px;
+    color: #aaa;
+    font-size: 110px;
+    z-index: -1;
+  }
+  .li-quote-attribution {
+    position: absolute;
+    color: #aaa;
+    right: 10vw;
+    margin-top: -36px;
+  }
+
   thead {
   }
   tr {
@@ -130,7 +162,7 @@ var css = `
     color: white;
     font-size: 12px;
     text-decoration: none;
-    margin: 18px;
+    margin: 0 18px 0 18px;
   }
   .li-nav-bar a:hover {
       text-decoration: underline;
@@ -286,6 +318,15 @@ document.addEventListener('DOMContentLoaded', function(){
 //main converter function
 function convert(md) {
 
+    showdown.setFlavor('github');
+    showdown.setOption('simpleLineBreaks', true);
+    showdown.setOption('emoji', true);
+    showdown.setOption('tables', true);
+    showdown.setOption('tasklists', true);
+    showdown.setOption('ghMentions', false);
+
+    var converter = new showdown.Converter();
+
     //remove '↵' that appears in textarea value
     md = md.replace(/↵/g, "\n");
 
@@ -324,6 +365,24 @@ function convert(md) {
     // li.table
     md = md.replace(/(?<!\\)@li\.table *\n(.*\t?)\n((.*\n)*?)( *\n)/g, toTable);
 
+    // TODO: not finished
+    // // |" quote  //TODO add to documentation
+    // md = md.replace(/\n(?:(?<!\\)\| *"(.*)\n?)+(.*)?/g, function(match, _, attribution){
+    //     var content = match.replace(attribution, "").split("\n").map(d => d.replace(/\| *(.*)/g, "$1"))
+    //     return "<blockquote class='li-quote'>" + convert(content.join("\n").replace(/"/g, "")) + "<span class='li-quote-attribution'>" + attribution + "</span>"
+    //  + "</blockquote>" });
+
+    // li.blockquote  //TODO add to documentation
+    md = md.replace(/ *(?<!\\)@li.blockquote *\(?([^\)]*)\)/g, function(_, content){
+
+        return "<blockquote class='li-blockquote'>" + converter.makeHtml(content) + "</blockquote>"
+    });
+    // | blockquote
+    md = md.replace(/\n(?:(?<!\\)\| *(.*)\n?)+/g, function(match, _){
+        var content = match.split("\n").map(d => d.replace(/\| *(.*)/g, "$1"))
+        return "<blockquote class='li-blockquote'>" + convert(content.join("\n")) + "</blockquote>"
+    });
+
     // li.youtube
     md = md.replace(/(?<!\\)@li\.[Yy]ou[Tt]ube\(([^,]*)(?: *, *(\d+|full|fullscreen))?\)/g, youTubeEmbed);
 
@@ -343,23 +402,14 @@ function convert(md) {
     md = md.replace(/ *(?<!\\)@li\.big(.*)?\n?/g, toBigText);
 
     // li.nav //TODO: make watermarks white if nav bar
+    //TODO add to documentation
     md = md.replace(/ *(?<!\\)@li\.nav(?:-?bar)?\(((?:[\n ]*\[.*\]\(.*\),?[\n ]*)+)\)/g, function(_, content){
         var nav = "<div class='li-nav-bar'>"
         content.replace(" ", "").replace("\n", "").split(",").forEach(function(d){
             nav += d.replace(/\[(.*)\]\((.*)\)/g, (_, name, href) => `<a href="${href}">${name}</a>`)
-
         })
         return nav + "</div>"
     })
-
-    showdown.setFlavor('github');
-    showdown.setOption('simpleLineBreaks', true);
-    showdown.setOption('emoji', true);
-    showdown.setOption('tables', true);
-    showdown.setOption('tasklists', true);
-    showdown.setOption('ghMentions', false);
-
-    var converter = new showdown.Converter();
 
     // li.center()
     md = md.replace(/ *(?<!\\)@li.cent(?:er|re) *\(((?:(?!\n\)\n)(?:.|\n))*)?\n *\)/g, function(_, content){
@@ -388,7 +438,7 @@ function convert(md) {
     html = html.replace(/(?<!\\)< *#(.*?):(.*?)>/g, "<span style='color:#$1;'>$2</span>");
 
     // unescape chars the user escaped
-    html = html.replace(/\\([@)])/g, "$1");
+    html = html.replace(/(?<!\\)\\([@)\|])/g, "$1");
 
     //remove backslash in \< and \> only if they are not part of actual tags
     html = html.replace(/\\(< *#)/g, "$1");    //hex colour tag
@@ -731,12 +781,12 @@ function toBigText(match, text) {
 function toFraktur(match, text, tag) {
     const normal = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     let fraktur = [120172,120173,120174,120175,120176,120177,120178,120179,120180,120181,120182,120183,120184,120185,120186,120187,120188,120189,120190,120191,120192,120193,120194,120195,120196,120197,120198,120199,120200,120201,120202,120203,120204,120205,120206,120207,120208,120209,120210,120211,120212,120213,120214,120215,120216,120217,120218,120219,120220,120221,120222,120223];
-    
+
     let _arr = text.split("");
-    
+
     return ("<" + tag + ">" + _arr.map(function(d){
         let index = normal.indexOf(d);
-        
+
         return index == -1 ? d : "&#x" + fraktur[index].toString(16);
     }).join("") + "</" + tag + ">");
 }
@@ -1010,25 +1060,25 @@ function toSankey(match, headers, body, none, blankLine) {
     if (typeof(d3) === "undefined") return d3Error;
 
     d3.sankey=function(){var sankey={},nodeWidth=24,nodePadding=8,size=[1,1],nodes=[],links=[];sankey.nodeWidth=function(_){if(!arguments.length)return nodeWidth;nodeWidth=+_;return sankey};sankey.nodePadding=function(_){if(!arguments.length)return nodePadding;nodePadding=+_;return sankey};sankey.nodes=function(_){if(!arguments.length)return nodes;nodes=_;return sankey};sankey.links=function(_){if(!arguments.length)return links;links=_;return sankey};sankey.size=function(_){if(!arguments.length)return size;size=_;return sankey};sankey.layout=function(iterations){computeNodeLinks();computeNodeValues();computeNodeBreadths();computeNodeDepths(iterations);computeLinkDepths();return sankey};sankey.relayout=function(){computeLinkDepths();return sankey};sankey.link=function(){var curvature=.5;function link(d){var x0=d.source.x+d.source.dx,x1=d.target.x,xi=d3.interpolateNumber(x0,x1),x2=xi(curvature),x3=xi(1-curvature),y0=d.source.y+d.sy+d.dy/2,y1=d.target.y+d.ty+d.dy/2;return"M"+x0+","+y0+"C"+x2+","+y0+" "+x3+","+y1+" "+x1+","+y1}
-link.curvature=function(_){if(!arguments.length)return curvature;curvature=+_;return link};return link};function computeNodeLinks(){nodes.forEach(function(node){node.sourceLinks=[];node.targetLinks=[]});links.forEach(function(link){var source=link.source,target=link.target;if(typeof source==="number")source=link.source=nodes[link.source];if(typeof target==="number")target=link.target=nodes[link.target];source.sourceLinks.push(link);target.targetLinks.push(link)})}
-function computeNodeValues(){nodes.forEach(function(node){node.value=Math.max(d3.sum(node.sourceLinks,value),d3.sum(node.targetLinks,value))})}
-function computeNodeBreadths(){var remainingNodes=nodes,nextNodes,x=0;while(remainingNodes.length){nextNodes=[];remainingNodes.forEach(function(node){node.x=x;node.dx=nodeWidth;node.sourceLinks.forEach(function(link){nextNodes.push(link.target)})});remainingNodes=nextNodes;++x}
-moveSinksRight(x);scaleNodeBreadths((window.innerWidth*0.8-nodeWidth)/(x-1))}
-function moveSourcesRight(){nodes.forEach(function(node){if(!node.targetLinks.length){node.x=d3.min(node.sourceLinks,function(d){return d.target.x})-1}})}
-function moveSinksRight(x){nodes.forEach(function(node){if(!node.sourceLinks.length){node.x=x-1}})}
-function scaleNodeBreadths(kx){nodes.forEach(function(node){node.x*=kx})}
-function computeNodeDepths(iterations){var nodesByBreadth=d3.nest().key(function(d){return d.x}).sortKeys(d3.ascending).entries(nodes).map(function(d){return d.values});initializeNodeDepth();resolveCollisions();for(var alpha=1;iterations>0;--iterations){relaxRightToLeft(alpha*=.99);resolveCollisions();relaxLeftToRight(alpha);resolveCollisions()}
-function initializeNodeDepth(){var ky=d3.min(nodesByBreadth,function(nodes){return(size[1]-(nodes.length-1)*nodePadding)/d3.sum(nodes,value)});nodesByBreadth.forEach(function(nodes){nodes.forEach(function(node,i){node.y=i;node.dy=node.value*ky})});links.forEach(function(link){link.dy=link.value*ky})}
-function relaxLeftToRight(alpha){nodesByBreadth.forEach(function(nodes,breadth){nodes.forEach(function(node){if(node.targetLinks.length){var y=d3.sum(node.targetLinks,weightedSource)/d3.sum(node.targetLinks,value);node.y+=(y-center(node))*alpha}})});function weightedSource(link){return center(link.source)*link.value}}
-function relaxRightToLeft(alpha){nodesByBreadth.slice().reverse().forEach(function(nodes){nodes.forEach(function(node){if(node.sourceLinks.length){var y=d3.sum(node.sourceLinks,weightedTarget)/d3.sum(node.sourceLinks,value);node.y+=(y-center(node))*alpha}})});function weightedTarget(link){return center(link.target)*link.value}}
-function resolveCollisions(){nodesByBreadth.forEach(function(nodes){var node,dy,y0=0,n=nodes.length,i;nodes.sort(ascendingDepth);for(i=0;i<n;++i){node=nodes[i];dy=y0-node.y;if(dy>0)node.y+=dy;y0=node.y+node.dy+nodePadding}
-dy=y0-nodePadding-size[1];if(dy>0){y0=node.y-=dy;for(i=n-2;i>=0;--i){node=nodes[i];dy=node.y+node.dy+nodePadding-y0;if(dy>0)node.y-=dy;y0=node.y}}})}
-function ascendingDepth(a,b){return a.y-b.y}}
-function computeLinkDepths(){nodes.forEach(function(node){node.sourceLinks.sort(ascendingTargetDepth);node.targetLinks.sort(ascendingSourceDepth)});nodes.forEach(function(node){var sy=0,ty=0;node.sourceLinks.forEach(function(link){link.sy=sy;sy+=link.dy});node.targetLinks.forEach(function(link){link.ty=ty;ty+=link.dy})});function ascendingSourceDepth(a,b){return a.source.y-b.source.y}
-function ascendingTargetDepth(a,b){return a.target.y-b.target.y}}
-function center(node){return node.y+node.dy/2}
-function value(link){return link.value}
-return sankey}
+    link.curvature=function(_){if(!arguments.length)return curvature;curvature=+_;return link};return link};function computeNodeLinks(){nodes.forEach(function(node){node.sourceLinks=[];node.targetLinks=[]});links.forEach(function(link){var source=link.source,target=link.target;if(typeof source==="number")source=link.source=nodes[link.source];if(typeof target==="number")target=link.target=nodes[link.target];source.sourceLinks.push(link);target.targetLinks.push(link)})}
+    function computeNodeValues(){nodes.forEach(function(node){node.value=Math.max(d3.sum(node.sourceLinks,value),d3.sum(node.targetLinks,value))})}
+    function computeNodeBreadths(){var remainingNodes=nodes,nextNodes,x=0;while(remainingNodes.length){nextNodes=[];remainingNodes.forEach(function(node){node.x=x;node.dx=nodeWidth;node.sourceLinks.forEach(function(link){nextNodes.push(link.target)})});remainingNodes=nextNodes;++x}
+    moveSinksRight(x);scaleNodeBreadths((window.innerWidth*0.8-nodeWidth)/(x-1))}
+    function moveSourcesRight(){nodes.forEach(function(node){if(!node.targetLinks.length){node.x=d3.min(node.sourceLinks,function(d){return d.target.x})-1}})}
+    function moveSinksRight(x){nodes.forEach(function(node){if(!node.sourceLinks.length){node.x=x-1}})}
+    function scaleNodeBreadths(kx){nodes.forEach(function(node){node.x*=kx})}
+    function computeNodeDepths(iterations){var nodesByBreadth=d3.nest().key(function(d){return d.x}).sortKeys(d3.ascending).entries(nodes).map(function(d){return d.values});initializeNodeDepth();resolveCollisions();for(var alpha=1;iterations>0;--iterations){relaxRightToLeft(alpha*=.99);resolveCollisions();relaxLeftToRight(alpha);resolveCollisions()}
+    function initializeNodeDepth(){var ky=d3.min(nodesByBreadth,function(nodes){return(size[1]-(nodes.length-1)*nodePadding)/d3.sum(nodes,value)});nodesByBreadth.forEach(function(nodes){nodes.forEach(function(node,i){node.y=i;node.dy=node.value*ky})});links.forEach(function(link){link.dy=link.value*ky})}
+    function relaxLeftToRight(alpha){nodesByBreadth.forEach(function(nodes,breadth){nodes.forEach(function(node){if(node.targetLinks.length){var y=d3.sum(node.targetLinks,weightedSource)/d3.sum(node.targetLinks,value);node.y+=(y-center(node))*alpha}})});function weightedSource(link){return center(link.source)*link.value}}
+    function relaxRightToLeft(alpha){nodesByBreadth.slice().reverse().forEach(function(nodes){nodes.forEach(function(node){if(node.sourceLinks.length){var y=d3.sum(node.sourceLinks,weightedTarget)/d3.sum(node.sourceLinks,value);node.y+=(y-center(node))*alpha}})});function weightedTarget(link){return center(link.target)*link.value}}
+    function resolveCollisions(){nodesByBreadth.forEach(function(nodes){var node,dy,y0=0,n=nodes.length,i;nodes.sort(ascendingDepth);for(i=0;i<n;++i){node=nodes[i];dy=y0-node.y;if(dy>0)node.y+=dy;y0=node.y+node.dy+nodePadding}
+    dy=y0-nodePadding-size[1];if(dy>0){y0=node.y-=dy;for(i=n-2;i>=0;--i){node=nodes[i];dy=node.y+node.dy+nodePadding-y0;if(dy>0)node.y-=dy;y0=node.y}}})}
+    function ascendingDepth(a,b){return a.y-b.y}}
+    function computeLinkDepths(){nodes.forEach(function(node){node.sourceLinks.sort(ascendingTargetDepth);node.targetLinks.sort(ascendingSourceDepth)});nodes.forEach(function(node){var sy=0,ty=0;node.sourceLinks.forEach(function(link){link.sy=sy;sy+=link.dy});node.targetLinks.forEach(function(link){link.ty=ty;ty+=link.dy})});function ascendingSourceDepth(a,b){return a.source.y-b.source.y}
+    function ascendingTargetDepth(a,b){return a.target.y-b.target.y}}
+    function center(node){return node.y+node.dy/2}
+    function value(link){return link.value}
+    return sankey}
 
     var data = parseD3CSV(match, body, none, blankLine);
     data = data.map(function(d){ return {source: d[0], target: d[1], value: d[2], colour: d[3]}})
@@ -1658,7 +1708,7 @@ function presentationModeSetup() {
 }
 
 //
-// scroll triggered animations§
+// scroll triggered animations
 //
 
 function triggerScrollAnimations() {
@@ -1686,4 +1736,3 @@ function scrollAnimationSetup() {
 function addScrollTrigger(obj) {
     scrollAnimations.push(obj);  // TODO: refactor
 }
-
